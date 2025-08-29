@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헤맨만큼 내 땅이다 - 실시간 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .big-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .emotion-bar {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        
+        .emotion-bar .emoji {
+            font-size: 1.5em;
+            width: 40px;
+        }
+        
+        .emotion-bar .bar {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .emotion-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-weight: bold;
+            transition: width 1s ease;
+        }
+        
+        .location-list {
+            list-style: none;
+        }
+        
+        .location-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .location-list .rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 5px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .time-update {
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        .iframe-container {
+            background: white;
+            border-radius: 20px;
+            padding: 10px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 헤맨만큼 내 땅이다</h1>
+        <p class="subtitle">프리즈·키아프 2025 실시간 관람 지도</p>
+        
+        <div class="dashboard">
+            <!-- 총 참여자 카드 -->
+            <div class="card">
+                <h2><span class="live-indicator"></span>실시간 참여 현황</h2>
+                <div class="big-number" id="total-posts">342</div>
+                <p style="text-align: center; opacity: 0.8;">명이 발자취를 남겼습니다</p>
+            </div>
+            
+            <!-- 감정 분포 카드 -->
+            <div class="card">
+                <h2>😊 관람객들의 감정</h2>
+                <div class="emotion-bar">
+                    <span class="emoji">😍</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 65%;">156</div>
+                    </div>
+                </div>
+                <div class="emotion-bar">
+                    <span class="emoji">👍</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 45%;">98</div>
+                    </div>
+                </div>
+                <div class="emotion-bar">
+                    <span class="emoji">🤔</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 25%;">45</div>
+                    </div>
+                </div>
+                <div class="emotion-bar">
+                    <span class="emoji">😴</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 20%;">43</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 인기 장소 카드 -->
+            <div class="card">
+                <h2>📍 인기 장소 TOP 5</h2>
+                <ul class="location-list">
+                    <li>
+                        <span><span class="rank">1</span> 프리즈 서울</span>
+                        <span>87</span>
+                    </li>
+                    <li>
+                        <span><span class="rank">2</span> 국제갤러리</span>
+                        <span>65</span>
+                    </li>
+                    <li>
+                        <span><span class="rank">3</span> 리움미술관</span>
+                        <span>43</span>
+                    </li>
+                    <li>
+                        <span><span class="rank">4</span> 삼청동</span>
+                        <span>38</span>
+                    </li>
+                    <li>
+                        <span><span class="rank">5</span> 성수동</span>
+                        <span>31</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- 트렌딩 키워드 카드 -->
+            <div class="card">
+                <h2>🔥 지금 뜨는 키워드</h2>
+                <div style="margin-top: 20px;">
+                    <span class="tag">#데이비드호크니</span>
+                    <span class="tag">#줄서기포기</span>
+                    <span class="tag">#발아파</span>
+                    <span class="tag">#감동</span>
+                    <span class="tag">#평일추천</span>
+                    <span class="tag">#숨은명소</span>
+                    <span class="tag">#카페투어</span>
+                    <span class="tag">#VIP부럽</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 실제 Padlet 임베드 -->
+        <div class="iframe-container">
+            <iframe src="https://padlet.com/CSS2025/css_-1_map-blwpq840o1u57awd" 
+                    allow="camera;microphone;geolocation">
+            </iframe>
+        </div>
+        
+        <p class="time-update">마지막 업데이트: <span id="update-time">2025-08-29 21:00:00</span></p>
+    </div>
+    
+    <script>
+        // 실시간 업데이트 시뮬레이션
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('ko-KR');
+            document.getElementById('update-time').textContent = timeString;
+        }
+        
+        // 숫자 애니메이션
+        function animateNumber() {
+            const totalPosts = document.getElementById('total-posts');
+            let current = parseInt(totalPosts.textContent);
+            const increment = Math.floor(Math.random() * 3) + 1;
+            totalPosts.textContent = current + increment;
+        }
+        
+        // 5초마다 업데이트
+        setInterval(updateTime, 1000);
+        setInterval(animateNumber, 5000);
+        
+        // 페이지 로드시 실행
+        updateTime();
+    </script>
+</body>
+</html>
