@@ -573,7 +573,8 @@ with tab3:
                     # 지역 선택 시 해당 갤러리 목록 표시
                     gallery_selection = st.selectbox(
                         "갤러리 선택",
-                        ["선택하세요"] + gallery_lists[area_option]
+                        ["선택하세요"] + gallery_lists[area_option],
+                        key="gallery_select"  # 고유 키 추가
                     )
                     
                     if gallery_selection == "선택하세요":
@@ -583,6 +584,10 @@ with tab3:
                 else:
                     gallery_name = None
                     st.info("지역/카테고리를 먼저 선택해주세요")
+                    
+                # 디버깅용 (임시)
+                st.caption(f"선택된 지역: {area_option}")
+                st.caption(f"사용 가능한 키: {list(gallery_lists.keys())}")
             
             st.markdown("### 🎨 전시 정보")
             exhibition_name = st.text_input("전시명 (선택사항)", placeholder="예: David Hockney 개인전")
