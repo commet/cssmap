@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 from padlet_api_complete import PadletAPI
 from supabase_storage import SupabaseStorage
+from gallery_coordinates import get_gallery_coordinates
 
 # .env 파일 로드
 load_dotenv()
@@ -734,14 +735,17 @@ with tab3:
                         if photo_url:
                             post_content += f"\n\n📸 사진 보기: {photo_url}"
                         
+                        # 갤러리의 실제 좌표 가져오기
+                        gallery_coords = get_gallery_coordinates(gallery_name)
+                        
                         # Padlet에 포스트 생성 (attachment_url 파라미터 사용)
                         result = padlet_api.create_post(
                             board_id=board_id,
                             subject=f"{gallery_name} - {exhibition_name}",
                             body=post_content,
                             attachment_url=photo_url,  # 사진 URL 추가
-                            map_props={"lat": 37.5665 + np.random.uniform(-0.05, 0.05),
-                                      "lon": 126.9780 + np.random.uniform(-0.05, 0.05)}
+                            map_props={"lat": gallery_coords["lat"],
+                                      "lon": gallery_coords["lon"]}
                         )
                         
                         if 'error' not in result:
@@ -756,11 +760,12 @@ with tab3:
                     # 제출 상태 초기화
                     st.session_state.submission_in_progress = False
                     
-                    # 위치 데이터도 업데이트
+                    # 위치 데이터도 업데이트 (실제 좌표 사용)
+                    gallery_coords = get_gallery_coordinates(gallery_name)
                     st.session_state.locations_data.append({
                         'name': gallery_name,
-                        'lat': 37.5665 + np.random.uniform(-0.05, 0.05),
-                        'lon': 126.9780 + np.random.uniform(-0.05, 0.05),
+                        'lat': gallery_coords["lat"],
+                        'lon': gallery_coords["lon"],
                         'emotion': emotion,
                         'notes': review_text[:100],
                         'timestamp': datetime.now()
