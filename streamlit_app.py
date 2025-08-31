@@ -333,16 +333,25 @@ with tab1:
             - **장소**: 서울 주요 갤러리
             
             ### 🏛️ 주요 참여 갤러리
-            - 국제갤러리
-            - 리움미술관
-            - 아트선재센터
-            - 갤러리현대
-            - 페이스갤러리
-            - PKM갤러리
-            - 가나아트센터
-            - 학고재갤러리
-            - 프리즈서울
-            - 키아프
+            
+            **주요 전시**
+            - 프리즈서울 & 키아프 (코엑스)
+            - 리움미술관, 아트선재센터
+            
+            **삼청 나잇 (9/4)**
+            - 국제갤러리, 갤러리현대, 학고재
+            - 아라리오갤러리, 바라캇 컨템포러리
+            - 갤러리진선, 예화랑, 우손갤러리
+            
+            **청담 나잇 (9/3)**
+            - 송은, 아뜰리에 에르메스, 페로탕
+            - Gladstone Gallery, White Cube Seoul
+            - 갤러리가이아, 김리아갤러리
+            
+            **한남 나잇 (9/2)**
+            - BHAK, 가나아트 한남, 리만머핀
+            - 타데우스 로팍, 갤러리바톤
+            - 에스더쉬퍼, 조현화랑
             
             ### 📊 현재 진행 상황
             """)
@@ -385,16 +394,25 @@ with tab1:
             - **Location**: Major galleries in Seoul
             
             ### 🏛️ Participating Galleries
-            - Kukje Gallery
-            - Leeum Museum
-            - Art Sonje Center
-            - Gallery Hyundai
-            - Pace Gallery
-            - PKM Gallery
-            - Gana Art Center
-            - Hakgojae Gallery
-            - Frieze Seoul
-            - KIAF
+            
+            **Major Exhibitions**
+            - Frieze Seoul & KIAF (COEX)
+            - Leeum Museum, Art Sonje Center
+            
+            **Samcheong Night (9/4)**
+            - Kukje Gallery, Gallery Hyundai, Hakgojae
+            - Arario Gallery, Barakat Contemporary
+            - Gallery Jean Sun, Yehwharang, Wooson Gallery
+            
+            **Cheongdam Night (9/3)**
+            - Songeun, Atelier Hermès, Perrotin
+            - Gladstone Gallery, White Cube Seoul
+            - Gallery Gaia, Kim Rhea Gallery
+            
+            **Hannam Night (9/2)**
+            - BHAK, Gana Art Hannam, Lehmann Maupin
+            - Thaddaeus Ropac, Gallery Baton
+            - Esther Schipper, Johyun Gallery
             
             ### 📊 Current Progress
             """)
@@ -448,12 +466,30 @@ with tab3:
             # 갤러리 선택 또는 직접 입력
             gallery_option = st.selectbox(
                 "갤러리 선택",
-                ["직접 입력", "국제갤러리", "리움미술관", "아트선재센터", "갤러리현대", 
-                 "페이스갤러리", "PKM갤러리", "가나아트센터", "학고재갤러리", "프리즈서울", "키아프"]
+                ["직접 입력", 
+                 "--- 주요 전시 ---",
+                 "프리즈서울(코엑스)", "키아프(코엑스)", "리움미술관", "아트선재센터",
+                 "--- 삼청 ---",
+                 "국제갤러리", "갤러리현대", "학고재", "아라리오갤러리", "바라캇 컨템포러리",
+                 "갤러리진선", "예화랑", "우손갤러리", "이화익갤러리", "초이앤초이갤러리",
+                 "BAIK ART Seoul", "갤러리조선",
+                 "--- 청담 ---",
+                 "송은", "아뜰리에 에르메스", "페로탕", "Gladstone Gallery", "White Cube Seoul",
+                 "갤러리가이아", "갤러리그라프", "김리아갤러리", "갤러리피치", "갤러리플래닛",
+                 "갤러리위", "G Gallery", "LEE EUGEAN GALLERY",
+                 "--- 한남 ---",
+                 "BHAK", "갤러리SP", "갤러리조은", "가나아트 한남", "리만머핀",
+                 "에스더쉬퍼", "타데우스 로팍", "갤러리바톤", "디스위켄드룸", "조현화랑",
+                 "P21", "실린더2", "두아르트 스퀘이라",
+                 "--- 기타 ---",
+                 "PKM갤러리", "페이스갤러리", "가나아트센터", "양혜규스튜디오"]
             )
             
             if gallery_option == "직접 입력":
                 gallery_name = st.text_input("갤러리 이름", placeholder="예: 새로운 갤러리")
+            elif gallery_option.startswith("---"):
+                gallery_name = None
+                st.info("갤러리를 선택해주세요")
             else:
                 gallery_name = gallery_option
             
