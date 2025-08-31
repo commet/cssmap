@@ -47,9 +47,10 @@ st.markdown("""
     /* 헤더 스타일 */
     .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem 3rem;
-        border-radius: 20px;
-        margin-bottom: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        margin-top: -1rem;
         box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
         animation: slideDown 0.5s ease-out;
     }
@@ -61,7 +62,7 @@ st.markdown("""
     
     .header-title {
         color: white;
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
         margin: 0;
         letter-spacing: -0.5px;
@@ -69,9 +70,38 @@ st.markdown("""
     
     .header-subtitle {
         color: rgba(255, 255, 255, 0.9);
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: 400;
-        margin-top: 0.5rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+        .main-header {
+            padding: 0.75rem 1rem;
+            margin-top: -0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .header-title {
+            font-size: 1.5rem;
+        }
+        
+        .header-subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+        }
     }
     
     /* 카드 스타일 */
