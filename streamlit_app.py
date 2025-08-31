@@ -627,7 +627,23 @@ with tab3:
                 if st.session_state.storage.client:
                     st.info("📤 사진이 클라우드에 업로드되어 Padlet에 공유됩니다.")
                 else:
-                    st.warning("📌 Supabase 설정이 없어 사진이 임시 저장만 됩니다. Padlet에 사진을 추가하려면 Supabase 설정이 필요합니다.")
+                    st.warning("📌 Supabase 설정이 없어 사진이 임시 저장만 됩니다.")
+                    with st.expander("🔧 Supabase 설정 방법 (5분 소요)"):
+                        st.markdown("""
+                        ### 빠른 설정 가이드
+                        
+                        1. **Supabase 가입**: [supabase.com](https://supabase.com) → Start your project
+                        2. **프로젝트 생성**: New Project → Region: Seoul 선택
+                        3. **Storage 설정**: Storage → Create bucket → Name: `gallery-photos`, Public: ✅
+                        4. **API 키 복사**: Settings → API → URL과 anon key 복사
+                        5. **Streamlit 설정**: 
+                           ```toml
+                           SUPABASE_URL = "복사한 URL"
+                           SUPABASE_ANON_KEY = "복사한 anon key"
+                           ```
+                        
+                        [📖 상세 가이드 보기](https://github.com/commet/cssmap/blob/main/SUPABASE_SETUP_GUIDE.md)
+                        """)
             
             # 추가 정보
             col_c, col_d = st.columns(2)
