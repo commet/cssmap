@@ -24,7 +24,7 @@ os.environ['PADLET_API_KEY'] = TEMP_API_KEY
 
 # 페이지 설정
 st.set_page_config(
-    page_title="CSS Art Map | 헤맨만큼 내 땅이다",
+    page_title="헤맨만큼 내 땅이다 | CSS",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -276,8 +276,8 @@ st.markdown("""
 # 헤더
 st.markdown("""
 <div class="main-header">
-    <h1 class="header-title">🎨 CSS Art Map</h1>
-    <p class="header-subtitle">헤맨만큼 내 땅이다 | 프리즈·키아프 2025 실시간 트래킹</p>
+    <h1 class="header-title">🎨 헤맨만큼 내 땅이다</h1>
+    <p class="header-subtitle">Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -296,7 +296,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["📖 사용 설명", "🗺️ Padlet �
 
 # 사용 설명 탭
 with tab1:
-    st.markdown('<div class="section-title">📖 CSS Art Map 사용 가이드</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📖 사용 가이드</div>', unsafe_allow_html=True)
     
     # 언어 선택
     lang = st.radio("Language / 언어", ["한국어", "English"], horizontal=True)
@@ -307,8 +307,8 @@ with tab1:
         with col1:
             st.markdown("""
             ### 🎯 프로젝트 소개
-            **"헤맨만큼 내 땅이다"**는 프리즈·키아프 2025 기간 동안 갤러리 방문 경험을 
-            공유하고 기록하는 CSS 아트 프로젝트입니다.
+            **"헤맨만큼 내 땅이다"**는 프리즈·키아프 미술주간 2025 기간 동안 갤러리 방문 경험을 
+            공유하고 기록하는 Curating School Seoul 프로젝트입니다.
             
             ### 📝 사용 방법
             1. **Padlet 지도 탭**: 실시간으로 업데이트되는 팀 전체의 방문 기록을 확인
@@ -328,7 +328,7 @@ with tab1:
         
         with col2:
             st.markdown("""
-            ### 📅 프리즈·키아프 2025
+            ### 📅 프리즈·키아프 미술주간 2025
             - **기간**: 2025년 9월 1일 - 7일
             - **장소**: 서울 주요 갤러리
             
@@ -359,8 +359,8 @@ with tab1:
         with col1:
             st.markdown("""
             ### 🎯 Project Introduction
-            **"As Much Land as I Wandered"** is a CSS art project that shares and records 
-            gallery visit experiences during Frieze·KIAF 2025.
+            **"As Much Land as I Wandered"** is a Curating School Seoul project that shares and records 
+            gallery visit experiences during Frieze·KIAF Art Week 2025.
             
             ### 📝 How to Use
             1. **Padlet Map Tab**: View real-time updates of team visits
@@ -380,7 +380,7 @@ with tab1:
         
         with col2:
             st.markdown("""
-            ### 📅 Frieze·KIAF 2025
+            ### 📅 Frieze·KIAF Art Week 2025
             - **Period**: September 1-7, 2025
             - **Location**: Major galleries in Seoul
             
@@ -820,8 +820,8 @@ with tab5:
 st.markdown("""
 <div style="margin-top: 3rem; padding: 2rem; background: white; border-radius: 16px; text-align: center; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
     <p style="color: #64748b; margin: 0;">
-        Made with ❤️ for CSS Art Map Project | 
-        <span class="gradient-text">프리즈·키아프 2025</span>
+        Made with ❤️ for Curating School Seoul | 
+        <span class="gradient-text">프리즈·키아프 미술주간 2025</span>
     </p>
 </div>
 """, unsafe_allow_html=True)
