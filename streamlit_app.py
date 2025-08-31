@@ -56,11 +56,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # API 키 확인 (디버깅용)
+# 임시 하드코딩 (Secrets 문제 해결 시까지)
+TEMP_API_KEY = "pdltp_d271492999e5db6c2cb47a28ea8598a13d343d0a7d32880eeb87d4ea89074944205d6c"
+
 api_key_found = False
 if "PADLET_API_KEY" in st.secrets:
     api_key_found = True
     os.environ['PADLET_API_KEY'] = st.secrets["PADLET_API_KEY"]
 elif os.getenv('PADLET_API_KEY'):
+    api_key_found = True
+else:
+    # 임시로 하드코딩된 키 사용
+    os.environ['PADLET_API_KEY'] = TEMP_API_KEY
     api_key_found = True
 
 # 세션 상태 초기화
