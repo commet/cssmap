@@ -276,8 +276,8 @@ st.markdown("""
 # 헤더
 st.markdown("""
 <div class="main-header">
-    <h1 class="header-title">🎨 헤맨만큼 내 땅이다</h1>
-    <p class="header-subtitle">As Much Land as I Wandered | Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
+    <h1 class="header-title">🎨 헤맨만큼 내 땅이다 | As Much Land as I Wandered</h1>
+    <p class="header-subtitle">Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
 </div>
 """, unsafe_allow_html=True)
 
