@@ -6,12 +6,33 @@ from typing import Optional, Dict, Any
 
 load_dotenv()
 
+# Streamlit secrets 지원
+try:
+    import streamlit as st
+    HAS_STREAMLIT = True
+except ImportError:
+    HAS_STREAMLIT = False
+
 class PadletAPI:
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Padlet API client with API key"""
-        self.api_key = api_key or os.getenv('PADLET_API_KEY')
+        # 1. 직접 전달된 API 키
+        # 2. Streamlit secrets
+        # 3. 환경변수
+        # 4. .env 파일
+        self.api_key = api_key
+        
+        if not self.api_key and HAS_STREAMLIT:
+            try:
+                self.api_key = st.secrets.get("PADLET_API_KEY")
+            except:
+                pass
+        
         if not self.api_key:
-            raise ValueError("Padlet API key not found. Set PADLET_API_KEY environment variable.")
+            self.api_key = os.getenv('PADLET_API_KEY')
+            
+        if not self.api_key:
+            raise ValueError("Padlet API key not found. Set PADLET_API_KEY in Streamlit secrets or environment variable.")
         
         self.base_url = "https://api.padlet.dev/v1"
         self.headers = {

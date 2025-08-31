@@ -57,7 +57,14 @@ st.markdown("""
 
 # 세션 상태 초기화
 if 'automation' not in st.session_state:
-    st.session_state.automation = CSSArtMapAutomation()
+    try:
+        st.session_state.automation = CSSArtMapAutomation()
+    except ValueError as e:
+        st.error("🔑 Padlet API 키가 설정되지 않았습니다.")
+        st.info("Streamlit Cloud에서 Settings → Secrets에 PADLET_API_KEY를 추가하세요.")
+        st.code('PADLET_API_KEY = "pdltp_your_api_key_here"')
+        st.stop()
+        
 if 'input_system' not in st.session_state:
     st.session_state.input_system = UserFriendlyInputSystem()
 
