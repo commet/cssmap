@@ -654,11 +654,14 @@ with tab3:
             with col_c:
                 visit_date = st.date_input("방문 날짜", value=date.today())
             with col_d:
-                stay_time = st.selectbox(
+                stay_time = st.slider(
                     "체류 시간",
-                    options=[0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0],
-                    format_func=lambda x: f"{int(x*60)}분" if x < 1 else f"{x:.1f}시간",
-                    index=5  # 기본값 1.5시간
+                    min_value=0.25,
+                    max_value=4.0,
+                    value=1.5,
+                    step=0.25,
+                    format="%.2f시간",
+                    help="15분 단위로 조정 가능 (15분~4시간)"
                 )
             
             submit = st.form_submit_button("🚀 후기 등록", use_container_width=True)
