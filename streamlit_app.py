@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 from padlet_api_complete import PadletAPI
+from supabase_storage import SupabaseStorage
 
 # .env 파일 로드
 load_dotenv()
@@ -611,12 +612,22 @@ with tab3:
             uploaded_file = st.file_uploader(
                 "전시 사진을 업로드하세요 (선택사항)",
                 type=['png', 'jpg', 'jpeg'],
-                help="⚠️ 중요: 사진은 브라우저 세션 메모리에만 임시 보관되며, 어떤 서버에도 저장되지 않습니다. 페이지 새로고침 시 사라집니다."
+                help="사진을 업로드하면 Supabase 클라우드에 저장되고 Padlet에 공유됩니다."
             )
             
+            photo_url = None
             if uploaded_file is not None:
                 st.image(uploaded_file, caption="업로드된 사진 (미리보기)", use_container_width=True)
-                st.warning("📌 사진 저장 안내: 현재 사진은 브라우저 메모리에만 임시 보관됩니다. 실제 저장을 원하시면 Padlet 사이트에서 직접 업로드해주세요.")
+                
+                # Supabase Storage 초기화
+                if 'storage' not in st.session_state:
+                    st.session_state.storage = SupabaseStorage()
+                
+                # Supabase가 설정되어 있으면 업로드 시도
+                if st.session_state.storage.client:
+                    st.info("📤 사진이 클라우드에 업로드되어 Padlet에 공유됩니다.")
+                else:
+                    st.warning("📌 Supabase 설정이 없어 사진이 임시 저장만 됩니다. Padlet에 사진을 추가하려면 Supabase 설정이 필요합니다.")
             
             # 추가 정보
             col_c, col_d = st.columns(2)
@@ -634,6 +645,12 @@ with tab3:
             
             if submit:
                 if gallery_name and review_text:
+                    # 사진 업로드 처리
+                    photo_url = None
+                    if uploaded_file and hasattr(st.session_state, 'storage') and st.session_state.storage.client:
+                        with st.spinner("사진 업로드 중..."):
+                            photo_url = st.session_state.storage.upload_photo(uploaded_file, gallery_name)
+                    
                     # 데이터 저장
                     new_review = {
                         'gallery': gallery_name,
@@ -643,7 +660,7 @@ with tab3:
                         'review': review_text,
                         'visit_date': visit_date,
                         'stay_time': stay_time,
-                        'photo': uploaded_file.name if uploaded_file else None,
+                        'photo': photo_url if photo_url else (uploaded_file.name if uploaded_file else None),
                         'timestamp': datetime.now()
                     }
                     
@@ -667,13 +684,18 @@ with tab3:
                         📅 방문일: {visit_date}
                         """
                         
-                        # Padlet에 포스트 생성
+                        # 사진 URL이 있으면 내용에 추가
+                        if photo_url:
+                            post_content += f"\n\n📸 사진 보기: {photo_url}"
+                        
+                        # Padlet에 포스트 생성 (attachment_url 파라미터 사용)
                         result = padlet_api.create_post(
                             board_id=board_id,
                             subject=f"{gallery_name} - {exhibition_name}",
                             body=post_content,
-                            lat=37.5665 + np.random.uniform(-0.05, 0.05),
-                            lon=126.9780 + np.random.uniform(-0.05, 0.05)
+                            attachment_url=photo_url,  # 사진 URL 추가
+                            map_props={"lat": 37.5665 + np.random.uniform(-0.05, 0.05),
+                                      "lon": 126.9780 + np.random.uniform(-0.05, 0.05)}
                         )
                         
                         if 'error' not in result:
