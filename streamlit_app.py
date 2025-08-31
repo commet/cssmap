@@ -55,14 +55,31 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# API 키 확인 (디버깅용)
+api_key_found = False
+if "PADLET_API_KEY" in st.secrets:
+    api_key_found = True
+    os.environ['PADLET_API_KEY'] = st.secrets["PADLET_API_KEY"]
+elif os.getenv('PADLET_API_KEY'):
+    api_key_found = True
+
 # 세션 상태 초기화
 if 'automation' not in st.session_state:
-    try:
-        st.session_state.automation = CSSArtMapAutomation()
-    except ValueError as e:
+    if not api_key_found:
         st.error("🔑 Padlet API 키가 설정되지 않았습니다.")
         st.info("Streamlit Cloud에서 Settings → Secrets에 PADLET_API_KEY를 추가하세요.")
         st.code('PADLET_API_KEY = "pdltp_your_api_key_here"')
+        
+        # 디버그 정보
+        with st.expander("디버그 정보"):
+            st.write("Secrets keys:", list(st.secrets.keys()) if hasattr(st, 'secrets') else "No secrets")
+            st.write("Environment PADLET_API_KEY:", "Yes" if os.getenv('PADLET_API_KEY') else "No")
+        st.stop()
+    
+    try:
+        st.session_state.automation = CSSArtMapAutomation()
+    except Exception as e:
+        st.error(f"오류 발생: {e}")
         st.stop()
         
 if 'input_system' not in st.session_state:

@@ -24,9 +24,11 @@ class PadletAPI:
         
         if not self.api_key and HAS_STREAMLIT:
             try:
-                self.api_key = st.secrets.get("PADLET_API_KEY")
-            except:
-                pass
+                # Streamlit secrets는 dictionary처럼 접근
+                if "PADLET_API_KEY" in st.secrets:
+                    self.api_key = st.secrets["PADLET_API_KEY"]
+            except Exception as e:
+                print(f"Error reading Streamlit secrets: {e}")
         
         if not self.api_key:
             self.api_key = os.getenv('PADLET_API_KEY')
