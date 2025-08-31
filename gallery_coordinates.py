@@ -70,13 +70,26 @@ GALLERY_COORDINATES = {
     "삼성미술관": {"lat": 37.5384, "lon": 126.9994}
 }
 
-def get_gallery_coordinates(gallery_name):
+# 지역별 대표 좌표 (직접 입력 갤러리용)
+AREA_COORDINATES = {
+    "삼청동": {"lat": 37.5800, "lon": 126.9750},
+    "청담동": {"lat": 37.5240, "lon": 127.0400},
+    "한남동": {"lat": 37.5345, "lon": 127.0048},
+    "강남": {"lat": 37.4979, "lon": 127.0276},
+    "홍대": {"lat": 37.5563, "lon": 126.9219},
+    "성수동": {"lat": 37.5447, "lon": 127.0557},
+    "이태원": {"lat": 37.5340, "lon": 126.9948},
+    "기타 서울": {"lat": 37.5665, "lon": 126.9780}  # 서울시청
+}
+
+def get_gallery_coordinates(gallery_name, custom_location=None):
     """
     갤러리 이름으로 좌표 반환
     Returns coordinates for a gallery name
     
     Args:
         gallery_name (str): 갤러리 이름
+        custom_location (str, optional): 직접 입력 갤러리의 지역명
         
     Returns:
         dict: {"lat": float, "lon": float} or None if not found
@@ -89,6 +102,16 @@ def get_gallery_coordinates(gallery_name):
     for gallery, coords in GALLERY_COORDINATES.items():
         if gallery_name in gallery or gallery in gallery_name:
             return coords
+    
+    # 직접 입력 갤러리의 경우 지역별 좌표 사용
+    if custom_location and custom_location in AREA_COORDINATES:
+        # 약간의 랜덤 오프셋 추가 (같은 지역 내 구분을 위해)
+        import random
+        base_coords = AREA_COORDINATES[custom_location]
+        return {
+            "lat": base_coords["lat"] + random.uniform(-0.003, 0.003),
+            "lon": base_coords["lon"] + random.uniform(-0.003, 0.003)
+        }
     
     # 기본값: 서울 중심부 (삼청동 근처)
     return {"lat": 37.5800, "lon": 126.9750}

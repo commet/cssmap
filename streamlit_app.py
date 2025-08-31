@@ -596,6 +596,16 @@ with tab3:
                             key="gallery_input",
                             label_visibility="collapsed"
                         )
+                        
+                        # 지역 선택 (직접 입력 갤러리용)
+                        if gallery_name:
+                            st.markdown("#### 갤러리 위치 선택")
+                            custom_location = st.selectbox(
+                                "이 갤러리는 어느 지역에 있나요?",
+                                ["삼청동", "청담동", "한남동", "강남", "홍대", "성수동", "이태원", "기타 서울"],
+                                key="custom_location",
+                                help="지도에 표시될 대략적인 위치입니다"
+                            )
                     elif gallery_selection != "--- 갤러리를 선택하세요 ---":
                         gallery_name = gallery_selection
                         st.success(f"✅ 선택된 갤러리: {gallery_name}")
@@ -735,8 +745,9 @@ with tab3:
                         if photo_url:
                             post_content += f"\n\n📸 사진 보기: {photo_url}"
                         
-                        # 갤러리의 실제 좌표 가져오기
-                        gallery_coords = get_gallery_coordinates(gallery_name)
+                        # 갤러리의 실제 좌표 가져오기 (직접 입력인 경우 지역 정보 전달)
+                        custom_location = st.session_state.get('custom_location', None) if '🖊️ 직접 입력' in str(st.session_state.get('gallery_dropdown', '')) else None
+                        gallery_coords = get_gallery_coordinates(gallery_name, custom_location)
                         
                         # Padlet에 포스트 생성 (attachment_url 파라미터 사용)
                         result = padlet_api.create_post(
@@ -761,7 +772,8 @@ with tab3:
                     st.session_state.submission_in_progress = False
                     
                     # 위치 데이터도 업데이트 (실제 좌표 사용)
-                    gallery_coords = get_gallery_coordinates(gallery_name)
+                    custom_location = st.session_state.get('custom_location', None) if '🖊️ 직접 입력' in str(st.session_state.get('gallery_dropdown', '')) else None
+                    gallery_coords = get_gallery_coordinates(gallery_name, custom_location)
                     st.session_state.locations_data.append({
                         'name': gallery_name,
                         'lat': gallery_coords["lat"],
