@@ -357,7 +357,7 @@ with tab1:
             공유하고 기록하는 Curating School Seoul 프로젝트입니다.
             
             ### 📝 사용 방법
-            1. **Padlet 지도 탭**: 실시간으로 업데이트되는 팀 전체의 방문 기록을 확인
+            1. **Padlet 지도 탭**: 실시간으로 업데이트되는 참여자들의 방문 기록을 확인
             2. **직접 작성 탭**: 갤러리 방문 후기를 작성하고 Padlet에 자동 업로드
             3. **대시보드 탭**: 프로젝트 통계와 트렌드 확인
             4. **분석 탭**: 상세한 데이터 분석 결과 확인
@@ -365,7 +365,7 @@ with tab1:
             ### 🚀 시작하기
             - 갤러리를 방문한 후 **"직접 작성"** 탭에서 후기를 작성하세요
             - 작성된 후기는 자동으로 Padlet 지도에 반영됩니다
-            - 다른 팀원들의 후기는 Padlet 지도에서 확인할 수 있습니다
+            - 다른 참여자들의 후기는 Padlet 지도에서 확인할 수 있습니다
             """)
             
             st.info("""
@@ -380,24 +380,27 @@ with tab1:
             
             ### 🏛️ 주요 참여 갤러리
             
-            🎨 주요 전시
-            - 프리즈서울 & 키아프 (코엑스)
-            - 리움미술관, 아트선재센터
+            🎨 아트 페어
+            - 프리즈 서울 (COEX)
+            - 키아프 (COEX)
             
-            🌃 삼청 나잇 (9/4)
+            🌃 삼청 나잇 (9/4, 목)
             - 국제갤러리, 갤러리현대, 학고재
             - 아라리오갤러리, 바라캇 컨템포러리
-            - 갤러리진선, 예화랑, 우손갤러리
+            - 갤러리 진선, 예화랑, 우손갤러리
             
-            ✨ 청담 나잇 (9/3)
+            ✨ 청담 나잇 (9/3, 수)
             - 송은, 아뜰리에 에르메스, 페로탕
             - Gladstone Gallery, White Cube Seoul
-            - 갤러리가이아, 김리아갤러리
+            - 갤러리 가이아, 김리아갤러리
             
-            🌙 한남 나잇 (9/2)
+            🌙 한남 나잇 (9/2, 화)
             - BHAK, 가나아트 한남, 리만머핀
             - 타데우스 로팍, 갤러리바톤
             - 에스더쉬퍼, 조현화랑
+            
+            🌆 을지로 나잇 (9/1, 월)
+            - 양혜규스튜디오
             
             ### 📊 현재 진행 상황
             """)
@@ -441,24 +444,27 @@ with tab1:
             
             ### 🏛️ Participating Galleries
             
-            🎨 Major Exhibitions
-            - Frieze Seoul & KIAF (COEX)
-            - Leeum Museum, Art Sonje Center
+            🎨 Art Fairs
+            - Frieze Seoul (COEX)
+            - KIAF (COEX)
             
-            🌃 Samcheong Night (9/4)
+            🌃 Samcheong Night (9/4, Thu)
             - Kukje Gallery, Gallery Hyundai, Hakgojae
             - Arario Gallery, Barakat Contemporary
             - Gallery Jean Sun, Yehwharang, Wooson Gallery
             
-            ✨ Cheongdam Night (9/3)
+            ✨ Cheongdam Night (9/3, Wed)
             - Songeun, Atelier Hermès, Perrotin
             - Gladstone Gallery, White Cube Seoul
             - Gallery Gaia, Kim Rhea Gallery
             
-            🌙 Hannam Night (9/2)
+            🌙 Hannam Night (9/2, Tue)
             - BHAK, Gana Art Hannam, Lehmann Maupin
             - Thaddaeus Ropac, Gallery Baton
             - Esther Schipper, Johyun Gallery
+            
+            🌆 Euljiro Night (9/1, Mon)
+            - Yang Hye Gyu Studio
             
             ### 📊 Current Progress
             """)
@@ -512,26 +518,25 @@ with tab3:
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        with st.form("review_form"):
+        # 방문 정보 컨테이너
+        with st.container():
             st.markdown("### 📍 방문 정보")
             
-            # 지역/카테고리 먼저 선택
-            col_area, col_gallery = st.columns(2)
+            # 3단계 갤러리 선택 프로세스
+            st.markdown("#### Step 1: 지역/카테고리 선택")
+            area_option = st.selectbox(
+                "",
+                ["--- 지역을 선택하세요 ---",
+                 "🎨 아트 페어",
+                 "🌃 삼청 나잇 (9/4, 목)",
+                 "✨ 청담 나잇 (9/3, 수)",
+                 "🌙 한남 나잇 (9/2, 화)",
+                 "🌆 을지로 나잇 (9/1, 월)",
+                 "🏛️ 이 기간 전국 갤러리"],
+                key="area_select"
+            )
             
-            with col_area:
-                area_option = st.selectbox(
-                    "지역/카테고리 선택",
-                    ["직접 입력",
-                     "🎨 아트 페어",
-                     "🌃 삼청 나잇 (9/4, 목)",
-                     "✨ 청담 나잇 (9/3, 수)",
-                     "🌙 한남 나잇 (9/2, 화)",
-                     "🌆 을지로 나잇 (9/1, 월)",
-                     "🏛️ 기타 주요 갤러리"],
-                    key="area_select"  # 고유 키 추가
-                )
-            
-            # 지역별 갤러리 리스트 (중복 제거)
+            # 지역별 갤러리 리스트
             gallery_lists = {
                 "🎨 아트 페어": ["프리즈 서울 (COEX)", "키아프 (COEX)"],
                 "🌃 삼청 나잇 (9/4, 목)": [
@@ -557,36 +562,40 @@ with tab3:
                     "두아르트 스퀘이라 서울"
                 ],
                 "🌆 을지로 나잇 (9/1, 월)": ["양혜규스튜디오"],
-                "🏛️ 기타 주요 갤러리": [
+                "🏛️ 이 기간 전국 갤러리": [
                     "리움미술관", "PKM갤러리", "페이스갤러리", 
                     "가나아트센터", "대림미술관", "삼성미술관"
                 ]
             }
             
-            with col_gallery:
-                if area_option == "직접 입력":
-                    # 직접 입력 선택 시
-                    gallery_name = st.text_input(
-                        "갤러리 이름 직접 입력",
-                        placeholder="예: 새로운 갤러리 이름",
-                        key="gallery_input"
-                    )
-                elif area_option in gallery_lists:
-                    # 지역 선택 시 해당 갤러리 목록 표시
-                    gallery_options = gallery_lists[area_option]
+            gallery_name = None
+            
+            if area_option != "--- 지역을 선택하세요 ---":
+                st.markdown("#### Step 2: 갤러리 선택")
+                
+                if area_option in gallery_lists:
+                    gallery_options = gallery_lists[area_option] + ["🖊️ 직접 입력"]
                     gallery_selection = st.selectbox(
-                        f"갤러리 선택 ({len(gallery_options)}개)",
+                        "",
                         ["--- 갤러리를 선택하세요 ---"] + gallery_options,
                         key="gallery_dropdown"
                     )
                     
-                    if gallery_selection == "--- 갤러리를 선택하세요 ---":
-                        gallery_name = None
-                    else:
+                    if gallery_selection == "🖊️ 직접 입력":
+                        st.markdown("#### Step 3: 직접 입력")
+                        gallery_name = st.text_input(
+                            "",
+                            placeholder="예: 새로운 갤러리 이름",
+                            key="gallery_input"
+                        )
+                    elif gallery_selection != "--- 갤러리를 선택하세요 ---":
                         gallery_name = gallery_selection
-                else:
-                    gallery_name = None
-                    st.info("👈 먼저 왼쪽에서 지역/카테고리를 선택해주세요")
+                        st.success(f"✅ 선택된 갤러리: {gallery_name}")
+            else:
+                st.info("👆 먼저 지역/카테고리를 선택해주세요")
+        
+        # 폼 시작 (나머지 필드들)
+        with st.form("review_form"):
             
             st.markdown("### 🎨 전시 정보")
             exhibition_name = st.text_input("전시명 (선택사항)", placeholder="예: David Hockney 개인전")
@@ -595,8 +604,6 @@ with tab3:
             col_a, col_b = st.columns(2)
             with col_a:
                 rating = st.slider("별점", 1, 5, 4)
-                stars = "⭐" * rating
-                st.write(stars)
             
             with col_b:
                 emotion = st.selectbox(
