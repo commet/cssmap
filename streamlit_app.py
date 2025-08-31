@@ -277,7 +277,7 @@ st.markdown("""
 st.markdown("""
 <div class="main-header">
     <h1 class="header-title">🎨 헤맨만큼 내 땅이다</h1>
-    <p class="header-subtitle">Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
+    <p class="header-subtitle">As Much Land as I Wandered | Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -393,7 +393,7 @@ with tab1:
             - Gladstone Gallery, White Cube Seoul
             - 갤러리가이아, 김리아갤러리
             
-            🌙 한남 나잇 (9/2)
+            🌙 한남 나이트 (9/2)
             - BHAK, 가나아트 한남, 리만머핀
             - 타데우스 로팍, 갤러리바톤
             - 에스더쉬퍼, 조현화랑
@@ -514,38 +514,78 @@ with tab3:
         with st.form("review_form"):
             st.markdown("### 📍 방문 정보")
             
-            # 갤러리 선택 또는 직접 입력
-            gallery_option = st.selectbox(
-                "갤러리 선택",
-                ["직접 입력", 
-                 "--- 주요 전시 ---",
-                 "프리즈서울(코엑스)", "키아프(코엑스)", "리움미술관", "아트선재센터",
-                 "--- 삼청 ---",
-                 "국제갤러리", "갤러리현대", "학고재", "아라리오갤러리", "바라캇 컨템포러리",
-                 "갤러리진선", "예화랑", "우손갤러리", "이화익갤러리", "초이앤초이갤러리",
-                 "BAIK ART Seoul", "갤러리조선",
-                 "--- 청담 ---",
-                 "송은", "아뜰리에 에르메스", "페로탕", "Gladstone Gallery", "White Cube Seoul",
-                 "갤러리가이아", "갤러리그라프", "김리아갤러리", "갤러리피치", "갤러리플래닛",
-                 "갤러리위", "G Gallery", "LEE EUGEAN GALLERY",
-                 "--- 한남 ---",
-                 "BHAK", "갤러리SP", "갤러리조은", "가나아트 한남", "리만머핀",
-                 "에스더쉬퍼", "타데우스 로팍", "갤러리바톤", "디스위켄드룸", "조현화랑",
-                 "P21", "실린더2", "두아르트 스퀘이라",
-                 "--- 기타 ---",
-                 "PKM갤러리", "페이스갤러리", "가나아트센터", "양혜규스튜디오"]
-            )
+            # 지역/카테고리 먼저 선택
+            col_area, col_gallery = st.columns(2)
             
-            if gallery_option == "직접 입력":
-                gallery_name = st.text_input("갤러리 이름", placeholder="예: 새로운 갤러리")
-            elif gallery_option.startswith("---"):
-                gallery_name = None
-                st.info("갤러리를 선택해주세요")
-            else:
-                gallery_name = gallery_option
+            with col_area:
+                area_option = st.selectbox(
+                    "지역/카테고리 선택",
+                    ["직접 입력",
+                     "🎨 아트 페어",
+                     "🌃 삼청 나잇 (9/4, 목)",
+                     "✨ 청담 나잇 (9/3, 수)",
+                     "🌙 한남 나잇 (9/2, 화)",
+                     "🌆 을지로 나잇 (9/1, 월)",
+                     "🏛️ 기타 주요 갤러리"]
+                )
+            
+            # 지역별 갤러리 리스트
+            gallery_lists = {
+                "🎨 아트 페어": ["프리즈 서울 (COEX)", "키아프 (COEX)"],
+                "🌃 삼청 나잇 (9/4, 목)": [
+                    "국제갤러리", "갤러리 진선", "예화랑", "우손갤러리 서울",
+                    "이화익갤러리", "초이앤초이 갤러리", "국제갤러리",
+                    "갤러리현대", "학고재", "바라캇 컨템포러리",
+                    "BAIK ART Seoul", "갤러리 조선", "아라리오갤러리 서울",
+                    "우손갤러리 서울", "아트선재센터", "재단법인 예울",
+                    "전혁림 (포리움사진)", "(ICA) 우양미술관도성포럼 미술관",
+                    "(삼원) PKM갤러리"
+                ],
+                "✨ 청담 나잇 (9/3, 수)": [
+                    "갤러리 가이아", "갤러리 그라프", "김리아갤러리",
+                    "갤러리 피치", "갤러리 플래닛", "갤러리위 청담",
+                    "Gladstone Gallery Seoul", "White Cube Seoul", "페로탕",
+                    "G Gallery 지갤러리", "갤러리 플래닛", "LEE EUGEAN GALLERY 이유진갤러리",
+                    "송은", "아뜰리에 에르메스"
+                ],
+                "🌙 한남 나이트 (9/2, 화)": [
+                    "BHAK", "갤러리 SP", "갤러리조은", "가나아트 한남",
+                    "리만머핀", "에스더쉬퍼", "타데우스 로팍 서울",
+                    "갤러리바톤", "디스위켄드룸", "ThisWeekendRoom",
+                    "조현화랑 서울", "P21", "실린더2",
+                    "두아르트 스퀘이라 서울"
+                ],
+                "🌆 을지로 나잇 (9/1, 월)": ["양혜규스튜디오"],
+                "🏛️ 기타 주요 갤러리": [
+                    "리움미술관", "PKM갤러리", "페이스갤러리", 
+                    "가나아트센터", "대림미술관", "삼성미술관"
+                ]
+            }
+            
+            with col_gallery:
+                if area_option == "직접 입력":
+                    # 직접 입력 선택 시
+                    gallery_name = st.text_input(
+                        "갤러리 직접 입력",
+                        placeholder="예: 새로운 갤러리 이름"
+                    )
+                elif area_option in gallery_lists:
+                    # 지역 선택 시 해당 갤러리 목록 표시
+                    gallery_selection = st.selectbox(
+                        "갤러리 선택",
+                        ["선택하세요"] + gallery_lists[area_option]
+                    )
+                    
+                    if gallery_selection == "선택하세요":
+                        gallery_name = None
+                    else:
+                        gallery_name = gallery_selection
+                else:
+                    gallery_name = None
+                    st.info("지역/카테고리를 먼저 선택해주세요")
             
             st.markdown("### 🎨 전시 정보")
-            exhibition_name = st.text_input("전시명", placeholder="예: David Hockney 개인전")
+            exhibition_name = st.text_input("전시명 (선택사항)", placeholder="예: David Hockney 개인전")
             
             st.markdown("### ⭐ 평가")
             col_a, col_b = st.columns(2)
@@ -618,7 +658,7 @@ with tab3:
                         # 후기 내용 포맷팅
                         post_content = f"""
                         📍 {gallery_name}
-                        🎨 {exhibition_name}
+                        🎨 {exhibition_name if exhibition_name else '전시 정보 없음'}
                         ⭐ {'⭐' * rating}
                         {emotion}
                         
