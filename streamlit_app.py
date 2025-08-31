@@ -527,7 +527,8 @@ with tab3:
                      "✨ 청담 나잇 (9/3, 수)",
                      "🌙 한남 나잇 (9/2, 화)",
                      "🌆 을지로 나잇 (9/1, 월)",
-                     "🏛️ 기타 주요 갤러리"]
+                     "🏛️ 기타 주요 갤러리"],
+                    key="area_select"  # 고유 키 추가
                 )
             
             # 지역별 갤러리 리스트 (중복 제거)
@@ -566,28 +567,26 @@ with tab3:
                 if area_option == "직접 입력":
                     # 직접 입력 선택 시
                     gallery_name = st.text_input(
-                        "갤러리 직접 입력",
-                        placeholder="예: 새로운 갤러리 이름"
+                        "갤러리 이름 직접 입력",
+                        placeholder="예: 새로운 갤러리 이름",
+                        key="gallery_input"
                     )
                 elif area_option in gallery_lists:
                     # 지역 선택 시 해당 갤러리 목록 표시
+                    gallery_options = gallery_lists[area_option]
                     gallery_selection = st.selectbox(
-                        "갤러리 선택",
-                        ["선택하세요"] + gallery_lists[area_option],
-                        key="gallery_select"  # 고유 키 추가
+                        f"갤러리 선택 ({len(gallery_options)}개)",
+                        ["--- 갤러리를 선택하세요 ---"] + gallery_options,
+                        key="gallery_dropdown"
                     )
                     
-                    if gallery_selection == "선택하세요":
+                    if gallery_selection == "--- 갤러리를 선택하세요 ---":
                         gallery_name = None
                     else:
                         gallery_name = gallery_selection
                 else:
                     gallery_name = None
-                    st.info("지역/카테고리를 먼저 선택해주세요")
-                    
-                # 디버깅용 (임시)
-                st.caption(f"선택된 지역: {area_option}")
-                st.caption(f"사용 가능한 키: {list(gallery_lists.keys())}")
+                    st.info("👈 먼저 왼쪽에서 지역/카테고리를 선택해주세요")
             
             st.markdown("### 🎨 전시 정보")
             exhibition_name = st.text_input("전시명 (선택사항)", placeholder="예: David Hockney 개인전")
