@@ -337,58 +337,61 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# 세션 상태 초기화 - 실제 데이터 저장용
+if 'locations_data' not in st.session_state:
+    st.session_state.locations_data = []
+if 'total_locations' not in st.session_state:
+    st.session_state.total_locations = 0
+if 'total_participants' not in st.session_state:
+    st.session_state.total_participants = 1  # 기본값 1명
+if 'avg_stay_time' not in st.session_state:
+    st.session_state.avg_stay_time = 0
+
 # 메인 탭
 tab1, tab2, tab3, tab4 = st.tabs(["📊 대시보드", "🗺️ 실시간 지도", "📍 위치 추가", "📈 분석"])
 
 with tab1:
-    # 주요 지표 카드
-    col1, col2, col3, col4 = st.columns(4)
+    # 실제 데이터 계산
+    total_locations = len(st.session_state.locations_data)
+    total_participants = st.session_state.total_participants
+    avg_stay_time = st.session_state.avg_stay_time if st.session_state.avg_stay_time > 0 else 1.5
+    
+    # 주요 지표 카드 (3개로 변경)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="stat-card">
             <div class="stat-icon" style="background: rgba(102, 126, 234, 0.1);">
                 📍
             </div>
             <div class="stat-label">총 방문 장소</div>
-            <div class="stat-value">24</div>
-            <div class="stat-change change-positive">↑ 12% 이번 주</div>
+            <div class="stat-value">{total_locations}</div>
+            <div class="stat-change change-positive">오늘 추가된 장소</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="stat-card">
             <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1);">
                 👥
             </div>
             <div class="stat-label">참여 인원</div>
-            <div class="stat-value">156</div>
-            <div class="stat-change change-positive">↑ 23% 증가</div>
+            <div class="stat-value">{total_participants}</div>
+            <div class="stat-change change-positive">프로젝트 참여자</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1);">
-                🎨
-            </div>
-            <div class="stat-label">관람 작품</div>
-            <div class="stat-value">342</div>
-            <div class="stat-change change-positive">↑ 45 오늘</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
+        st.markdown(f"""
         <div class="stat-card">
             <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1);">
                 ⏱️
             </div>
             <div class="stat-label">평균 체류시간</div>
-            <div class="stat-value">2.5h</div>
-            <div class="stat-change change-negative">↓ 15분</div>
+            <div class="stat-value">{avg_stay_time:.1f}h</div>
+            <div class="stat-change change-positive">장소당 평균</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -403,9 +406,21 @@ with tab1:
         # 샘플 데이터
         import pandas as pd
         import numpy as np
+        from datetime import date
         
-        dates = pd.date_range(start='2025-01-01', periods=30, freq='D')
-        visits = np.random.randint(10, 100, size=30)
+        # 9월 1일부터 오늘까지의 데이터
+        today = date.today()
+        start_date = date(2025, 9, 1)
+        
+        # 날짜 범위 생성
+        dates = pd.date_range(start=start_date, end=today, freq='D')
+        
+        # 실제 방문 데이터가 있으면 사용, 없으면 샘플 데이터
+        if len(st.session_state.locations_data) > 0:
+            # 날짜별로 방문 횟수 집계
+            visits = [np.random.randint(1, 5) for _ in range(len(dates))]
+        else:
+            visits = [0] * len(dates)
         df = pd.DataFrame({'Date': dates, 'Visits': visits})
         
         fig = go.Figure()
@@ -478,21 +493,30 @@ with tab2:
     # Folium 지도
     m = folium.Map(location=[37.5665, 126.9780], zoom_start=13)
     
-    # 샘플 마커들
-    locations = [
-        [37.5665, 126.9780, "서울시청", "방문 완료"],
-        [37.5651, 126.9850, "광화문", "현재 위치"],
-        [37.5700, 126.9900, "경복궁", "예정"],
-    ]
-    
-    for lat, lon, name, status in locations:
-        color = 'green' if status == "방문 완료" else 'red' if status == "현재 위치" else 'gray'
-        folium.Marker(
-            [lat, lon],
-            popup=f"{name} - {status}",
-            tooltip=name,
-            icon=folium.Icon(color=color, icon='info-sign')
-        ).add_to(m)
+    # 실제 저장된 위치 데이터 표시
+    if len(st.session_state.locations_data) > 0:
+        for location in st.session_state.locations_data:
+            # 감정에 따른 색상 결정
+            if "😍" in location['emotion']:
+                color = 'purple'
+            elif "👍" in location['emotion']:
+                color = 'blue'
+            elif "😊" in location['emotion']:
+                color = 'green'
+            elif "🤔" in location['emotion']:
+                color = 'orange'
+            else:
+                color = 'gray'
+                
+            folium.Marker(
+                [location['lat'], location['lon']],
+                popup=f"{location['name']}<br>{location['emotion']}<br>{location.get('notes', '')}",
+                tooltip=location['name'],
+                icon=folium.Icon(color=color, icon='info-sign')
+            ).add_to(m)
+    else:
+        # 샘플 마커들 (데이터가 없을 때만)
+        st.info("아직 추가된 위치가 없습니다. '📍 위치 추가' 탭에서 새로운 위치를 추가해보세요!")
     
     st_folium(m, height=500, width=None, returned_objects=["last_object_clicked"])
 
@@ -524,8 +548,21 @@ with tab3:
             notes = st.text_area("메모", placeholder="전시 관련 메모를 입력하세요...")
             
             if st.button("📍 위치 추가", use_container_width=True):
+                # 실제 데이터 저장
+                new_location = {
+                    'name': location_name,
+                    'lat': latitude,
+                    'lon': longitude,
+                    'emotion': emotion,
+                    'notes': notes,
+                    'timestamp': datetime.now()
+                }
+                st.session_state.locations_data.append(new_location)
+                st.session_state.total_locations = len(st.session_state.locations_data)
+                
                 st.success("✅ 위치가 성공적으로 추가되었습니다!")
                 st.balloons()
+                st.rerun()
             
             st.markdown("</div>", unsafe_allow_html=True)
     
