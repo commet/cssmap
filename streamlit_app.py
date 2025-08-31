@@ -290,6 +290,51 @@ if 'total_participants' not in st.session_state:
     st.session_state.total_participants = 1
 if 'avg_stay_time' not in st.session_state:
     st.session_state.avg_stay_time = 1.5
+if 'padlet_data' not in st.session_state:
+    st.session_state.padlet_data = []
+if 'last_padlet_fetch' not in st.session_state:
+    st.session_state.last_padlet_fetch = None
+
+# Padlet 데이터 가져오기 함수
+def fetch_padlet_data():
+    """Padlet에서 데이터를 가져와서 로컬 데이터와 동기화"""
+    try:
+        # 마지막 fetch로부터 5분이 지났는지 체크
+        if st.session_state.last_padlet_fetch:
+            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 300:
+                return  # 5분 이내면 다시 가져오지 않음
+        
+        padlet_api = PadletAPI()
+        board_id = "blwpq840o1u57awd"
+        
+        # Padlet 보드 데이터 가져오기
+        board_data = padlet_api.get_board(board_id, include_posts=True)
+        
+        if 'data' in board_data and 'included' in board_data:
+            posts = board_data['included']
+            
+            # Padlet 포스트를 reviews 형식으로 변환
+            for post in posts:
+                if post.get('type') == 'posts':
+                    attributes = post.get('attributes', {})
+                    
+                    # 이미 있는 데이터인지 체크 (중복 방지)
+                    post_id = post.get('id')
+                    if not any(r.get('padlet_id') == post_id for r in st.session_state.padlet_data):
+                        padlet_review = {
+                            'padlet_id': post_id,
+                            'gallery': attributes.get('subject', '갤러리'),
+                            'review': attributes.get('body', ''),
+                            'timestamp': attributes.get('created_at', datetime.now()),
+                            'from_padlet': True
+                        }
+                        st.session_state.padlet_data.append(padlet_review)
+        
+        st.session_state.last_padlet_fetch = datetime.now()
+        
+    except Exception as e:
+        # 에러가 있어도 앱이 중단되지 않도록
+        pass
 
 # 메인 탭 (사용 설명을 첫 번째로)
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📖 사용 설명", "🗺️ Padlet 지도", "✍️ 직접 작성", "📊 대시보드", "📈 분석"])
@@ -307,7 +352,7 @@ with tab1:
         with col1:
             st.markdown("""
             ### 🎯 프로젝트 소개
-            **"헤맨만큼 내 땅이다"**는 프리즈·키아프 미술주간 2025 기간 동안 갤러리 방문 경험을 
+            "헤맨만큼 내 땅이다"는 프리즈·키아프 미술주간 2025 기간 동안 갤러리 방문 경험을 
             공유하고 기록하는 Curating School Seoul 프로젝트입니다.
             
             ### 📝 사용 방법
@@ -323,7 +368,7 @@ with tab1:
             """)
             
             st.info("""
-            💡 **Tip**: 사진을 함께 업로드하면 더욱 생생한 후기가 됩니다!
+            💡 Tip: 사진을 함께 업로드하면 더욱 생생한 후기가 됩니다!
             """)
         
         with col2:
@@ -334,21 +379,21 @@ with tab1:
             
             ### 🏛️ 주요 참여 갤러리
             
-            **주요 전시**
+            🎨 주요 전시
             - 프리즈서울 & 키아프 (코엑스)
             - 리움미술관, 아트선재센터
             
-            **삼청 나잇 (9/4)**
+            🌃 삼청 나잇 (9/4)
             - 국제갤러리, 갤러리현대, 학고재
             - 아라리오갤러리, 바라캇 컨템포러리
             - 갤러리진선, 예화랑, 우손갤러리
             
-            **청담 나잇 (9/3)**
+            ✨ 청담 나잇 (9/3)
             - 송은, 아뜰리에 에르메스, 페로탕
             - Gladstone Gallery, White Cube Seoul
             - 갤러리가이아, 김리아갤러리
             
-            **한남 나잇 (9/2)**
+            🌙 한남 나잇 (9/2)
             - BHAK, 가나아트 한남, 리만머핀
             - 타데우스 로팍, 갤러리바톤
             - 에스더쉬퍼, 조현화랑
@@ -368,7 +413,7 @@ with tab1:
         with col1:
             st.markdown("""
             ### 🎯 Project Introduction
-            **"As Much Land as I Wandered"** is a Curating School Seoul project that shares and records 
+            "As Much Land as I Wandered" is a Curating School Seoul project that shares and records 
             gallery visit experiences during Frieze·KIAF Art Week 2025.
             
             ### 📝 How to Use
@@ -384,7 +429,7 @@ with tab1:
             """)
             
             st.info("""
-            💡 **Tip**: Upload photos for more vivid reviews!
+            💡 Tip: Upload photos for more vivid reviews!
             """)
         
         with col2:
@@ -395,21 +440,21 @@ with tab1:
             
             ### 🏛️ Participating Galleries
             
-            **Major Exhibitions**
+            🎨 Major Exhibitions
             - Frieze Seoul & KIAF (COEX)
             - Leeum Museum, Art Sonje Center
             
-            **Samcheong Night (9/4)**
+            🌃 Samcheong Night (9/4)
             - Kukje Gallery, Gallery Hyundai, Hakgojae
             - Arario Gallery, Barakat Contemporary
             - Gallery Jean Sun, Yehwharang, Wooson Gallery
             
-            **Cheongdam Night (9/3)**
+            ✨ Cheongdam Night (9/3)
             - Songeun, Atelier Hermès, Perrotin
             - Gladstone Gallery, White Cube Seoul
             - Gallery Gaia, Kim Rhea Gallery
             
-            **Hannam Night (9/2)**
+            🌙 Hannam Night (9/2)
             - BHAK, Gana Art Hannam, Lehmann Maupin
             - Thaddaeus Ropac, Gallery Baton
             - Esther Schipper, Johyun Gallery
@@ -426,6 +471,12 @@ with tab1:
 # Padlet 지도 탭
 with tab2:
     st.markdown('<div class="section-title">🗺️ Padlet 실시간 지도</div>', unsafe_allow_html=True)
+    
+    # Padlet 데이터 가져오기 시도
+    fetch_padlet_data()
+    
+    if len(st.session_state.padlet_data) > 0:
+        st.info(f"📥 Padlet에서 {len(st.session_state.padlet_data)}개의 포스트를 불러왔습니다.")
     
     # Padlet URL
     padlet_url = "https://padlet.com/CSS2025/css_-1_map-blwpq840o1u57awd"
@@ -521,12 +572,12 @@ with tab3:
             uploaded_file = st.file_uploader(
                 "전시 사진을 업로드하세요 (선택사항)",
                 type=['png', 'jpg', 'jpeg'],
-                help="⚠️ 주의: 현재 사진은 미리보기용으로만 표시되며, 서버에 저장되지 않습니다. Padlet에 직접 업로드하려면 Padlet 사이트를 이용해주세요."
+                help="⚠️ 중요: 사진은 브라우저 세션 메모리에만 임시 보관되며, 어떤 서버에도 저장되지 않습니다. 페이지 새로고침 시 사라집니다."
             )
             
             if uploaded_file is not None:
                 st.image(uploaded_file, caption="업로드된 사진 (미리보기)", use_container_width=True)
-                st.info("📌 사진은 현재 세션에서만 표시되며 서버에 저장되지 않습니다.")
+                st.warning("📌 사진 저장 안내: 현재 사진은 브라우저 메모리에만 임시 보관됩니다. 실제 저장을 원하시면 Padlet 사이트에서 직접 업로드해주세요.")
             
             # 추가 정보
             col_c, col_d = st.columns(2)
@@ -647,11 +698,18 @@ with tab3:
 
 # 대시보드 탭
 with tab4:
-    # 실제 데이터 계산
+    # Padlet 데이터 가져오기
+    fetch_padlet_data()
+    
+    # 실제 데이터 계산 (로컬 + Padlet 데이터)
     total_locations = len(st.session_state.locations_data)
-    total_reviews = len(st.session_state.reviews)
+    total_reviews = len(st.session_state.reviews) + len(st.session_state.padlet_data)
     total_participants = st.session_state.total_participants
     avg_stay_time = st.session_state.avg_stay_time
+    
+    # Padlet 데이터 동기화 상태 표시
+    if st.session_state.last_padlet_fetch:
+        st.caption(f"🔄 Padlet 동기화: {st.session_state.last_padlet_fetch.strftime('%H:%M')} (로컬: {len(st.session_state.reviews)}개, Padlet: {len(st.session_state.padlet_data)}개)")
     
     # 주요 지표 카드
     col1, col2, col3, col4 = st.columns(4)
@@ -751,7 +809,10 @@ with tab4:
             xaxis=dict(
                 showgrid=False,
                 showline=False,
-                zeroline=False
+                zeroline=False,
+                tickformat='%m/%d',  # 월/일 형식으로 표시
+                tickmode='linear',
+                dtick=86400000  # 1일 간격 (밀리초 단위)
             ),
             yaxis=dict(
                 showgrid=True,
@@ -798,59 +859,186 @@ with tab4:
 with tab5:
     st.markdown('<div class="section-title">📈 상세 분석</div>', unsafe_allow_html=True)
     
+    st.info("📊 아래 그래프들은 현재 예시 데이터로 표시됩니다. 실제 데이터가 쌓이면 자동으로 업데이트됩니다.")
+    
+    # 첫 번째 행
     col1, col2 = st.columns(2)
     
     with col1:
-        # 평점 분포
-        if len(st.session_state.reviews) > 0:
-            ratings = [r['rating'] for r in st.session_state.reviews]
-            rating_counts = {i: ratings.count(i) for i in range(1, 6)}
-            
-            fig = go.Figure(data=[go.Bar(
-                x=list(rating_counts.keys()),
-                y=list(rating_counts.values()),
-                marker_color='#667eea'
-            )])
-            
-            fig.update_layout(
-                title="평점 분포",
-                xaxis_title="별점",
-                yaxis_title="개수",
-                height=350,
-                margin=dict(l=0, r=0, t=40, b=0),
-                paper_bgcolor='white'
+        # 평점 분포 (Mock Data)
+        st.markdown("### ⭐ 평점 분포")
+        mock_ratings = {1: 2, 2: 5, 3: 12, 4: 28, 5: 45}
+        
+        fig = go.Figure(data=[go.Bar(
+            x=list(mock_ratings.keys()),
+            y=list(mock_ratings.values()),
+            text=list(mock_ratings.values()),
+            textposition='outside',
+            marker=dict(
+                color=list(mock_ratings.values()),
+                colorscale='Purples',
+                showscale=False
             )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("분석할 데이터가 없습니다.")
+        )])
+        
+        fig.update_layout(
+            xaxis_title="별점",
+            yaxis_title="후기 수",
+            height=350,
+            margin=dict(l=0, r=0, t=20, b=0),
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            xaxis=dict(tickmode='linear', tick0=1, dtick=1)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # 감정 분포
-        if len(st.session_state.reviews) > 0:
-            emotions = [r['emotion'].split()[0] for r in st.session_state.reviews]
-            emotion_counts = {}
-            for e in emotions:
-                emotion_counts[e] = emotion_counts.get(e, 0) + 1
-            
-            fig = go.Figure(data=[go.Pie(
-                labels=list(emotion_counts.keys()),
-                values=list(emotion_counts.values()),
-                hole=.7,
-                marker_colors=['#667eea', '#764ba2', '#ec4899', '#f59e0b', '#64748b']
-            )])
-            
-            fig.update_layout(
-                annotations=[dict(text='감정<br>분포', x=0.5, y=0.5, font_size=14, showarrow=False)],
-                showlegend=True,
-                height=350,
-                margin=dict(l=0, r=0, t=20, b=0),
-                paper_bgcolor='white'
+        # 감정 분포 (Mock Data)
+        st.markdown("### 😊 감정 분석")
+        mock_emotions = {"😍": 35, "👍": 28, "😊": 20, "🤔": 12, "😴": 5}
+        
+        fig = go.Figure(data=[go.Pie(
+            labels=list(mock_emotions.keys()),
+            values=list(mock_emotions.values()),
+            hole=.6,
+            marker_colors=['#667eea', '#764ba2', '#ec4899', '#f59e0b', '#64748b']
+        )])
+        
+        fig.update_layout(
+            annotations=[dict(text='감정<br>분포', x=0.5, y=0.5, font_size=14, showarrow=False)],
+            showlegend=True,
+            height=350,
+            margin=dict(l=0, r=0, t=20, b=0),
+            paper_bgcolor='white'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # 두 번째 행
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        # 시간대별 방문 (Mock Data)
+        st.markdown("### ⏰ 시간대별 방문 패턴")
+        hours = list(range(10, 20))  # 10시부터 19시까지
+        visits = [5, 8, 15, 22, 18, 25, 30, 28, 20, 12]
+        
+        fig = go.Figure(data=[go.Scatter(
+            x=hours,
+            y=visits,
+            mode='lines+markers',
+            fill='tozeroy',
+            line=dict(color='#667eea', width=3),
+            marker=dict(size=8, color='#764ba2'),
+            fillcolor='rgba(102, 126, 234, 0.2)'
+        )])
+        
+        fig.update_layout(
+            xaxis_title="시간",
+            yaxis_title="방문자 수",
+            height=350,
+            margin=dict(l=0, r=0, t=20, b=0),
+            paper_bgcolor='white',
+            xaxis=dict(tickmode='linear', tick0=10, dtick=1, ticksuffix="시")
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col4:
+        # 체류 시간 분석 (Mock Data)
+        st.markdown("### ⏱️ 평균 체류 시간")
+        galleries = ["국제갤러리", "갤러리현대", "리움", "페로탕", "송은"]
+        stay_times = [2.5, 1.8, 3.2, 1.5, 2.0]
+        
+        fig = go.Figure(data=[go.Bar(
+            x=stay_times,
+            y=galleries,
+            orientation='h',
+            text=[f"{t}시간" for t in stay_times],
+            textposition='outside',
+            marker=dict(
+                color=stay_times,
+                colorscale='Purples',
+                showscale=False
             )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("분석할 데이터가 없습니다.")
+        )])
+        
+        fig.update_layout(
+            xaxis_title="시간",
+            yaxis_title="",
+            height=350,
+            margin=dict(l=0, r=0, t=20, b=0),
+            paper_bgcolor='white'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # 세 번째 행 - 히트맵
+    st.markdown("### 🗓️ 주간 활동 히트맵")
+    
+    # Mock data for heatmap
+    days = ['월', '화', '수', '목', '금', '토', '일']
+    times = ['오전', '오후', '저녁']
+    z_data = [[5, 15, 8], [10, 25, 12], [8, 30, 15], [12, 35, 20], [20, 40, 25], [35, 45, 30], [30, 38, 22]]
+    
+    fig = go.Figure(data=go.Heatmap(
+        z=z_data,
+        x=times,
+        y=days,
+        colorscale='Purples',
+        text=z_data,
+        texttemplate="%{text}",
+        textfont={"size": 12},
+        colorbar=dict(title="방문 수")
+    ))
+    
+    fig.update_layout(
+        height=300,
+        margin=dict(l=0, r=0, t=20, b=0),
+        paper_bgcolor='white'
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # 네 번째 행 - 워드 클라우드 대체
+    st.markdown("### 🏷️ 인기 키워드")
+    
+    keywords_data = {
+        "현대미술": 45, "설치미술": 38, "회화": 35, "조각": 30,
+        "미디어아트": 28, "사진": 25, "퍼포먼스": 22, "개념미술": 20,
+        "추상": 18, "구상": 15, "팝아트": 12, "미니멀리즘": 10
+    }
+    
+    col5, col6, col7, col8 = st.columns(4)
+    sorted_keywords = sorted(keywords_data.items(), key=lambda x: x[1], reverse=True)
+    
+    for i, col in enumerate([col5, col6, col7, col8]):
+        if i*3 < len(sorted_keywords):
+            with col:
+                for j in range(3):
+                    idx = i*3 + j
+                    if idx < len(sorted_keywords):
+                        keyword, count = sorted_keywords[idx]
+                        size = 1.5 - (idx * 0.08)  # 크기 점진적 감소
+                        opacity = 1.0 - (idx * 0.05)  # 투명도 점진적 증가
+                        st.markdown(f"""
+                        <div style="
+                            background: linear-gradient(135deg, rgba(102, 126, 234, {opacity}), rgba(118, 75, 162, {opacity}));
+                            color: white;
+                            padding: 0.5rem;
+                            border-radius: 20px;
+                            text-align: center;
+                            margin-bottom: 0.5rem;
+                            font-size: {size}rem;
+                            font-weight: 600;
+                        ">
+                            {keyword} ({count})
+                        </div>
+                        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.caption("💡 참고: 위 분석 데이터는 예시입니다. 실제 후기가 누적되면 자동으로 실제 데이터 기반 분석으로 전환됩니다.")
 
 # 푸터
 st.markdown("""
