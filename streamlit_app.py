@@ -295,6 +295,10 @@ if 'padlet_data' not in st.session_state:
     st.session_state.padlet_data = []
 if 'last_padlet_fetch' not in st.session_state:
     st.session_state.last_padlet_fetch = None
+if 'submission_in_progress' not in st.session_state:
+    st.session_state.submission_in_progress = False
+if 'last_submission_time' not in st.session_state:
+    st.session_state.last_submission_time = None
 
 # Padlet 데이터 가져오기 함수
 def fetch_padlet_data():
@@ -525,7 +529,7 @@ with tab3:
             # 3단계 갤러리 선택 프로세스
             st.markdown("#### Step 1: 지역/카테고리 선택")
             area_option = st.selectbox(
-                "",
+                "지역/카테고리 선택",
                 ["--- 지역을 선택하세요 ---",
                  "🎨 아트 페어",
                  "🌃 삼청 나잇 (9/4, 목)",
@@ -533,7 +537,8 @@ with tab3:
                  "🌙 한남 나잇 (9/2, 화)",
                  "🌆 을지로 나잇 (9/1, 월)",
                  "🏛️ 이 기간 전국 갤러리"],
-                key="area_select"
+                key="area_select",
+                label_visibility="collapsed"
             )
             
             # 지역별 갤러리 리스트
@@ -576,17 +581,19 @@ with tab3:
                 if area_option in gallery_lists:
                     gallery_options = gallery_lists[area_option] + ["🖊️ 직접 입력"]
                     gallery_selection = st.selectbox(
-                        "",
+                        "갤러리 선택",
                         ["--- 갤러리를 선택하세요 ---"] + gallery_options,
-                        key="gallery_dropdown"
+                        key="gallery_dropdown",
+                        label_visibility="collapsed"
                     )
                     
                     if gallery_selection == "🖊️ 직접 입력":
                         st.markdown("#### Step 3: 직접 입력")
                         gallery_name = st.text_input(
-                            "",
+                            "갤러리 이름 직접 입력",
                             placeholder="예: 새로운 갤러리 이름",
-                            key="gallery_input"
+                            key="gallery_input",
+                            label_visibility="collapsed"
                         )
                     elif gallery_selection != "--- 갤러리를 선택하세요 ---":
                         gallery_name = gallery_selection
@@ -671,10 +678,19 @@ with tab3:
                     help="15분 단위로 조정 가능 (15분~4시간)"
                 )
             
-            submit = st.form_submit_button("🚀 후기 등록", use_container_width=True)
+            submit = st.form_submit_button("🚀 후기 등록", use_container_width=True, disabled=st.session_state.submission_in_progress)
             
-            if submit:
+            if submit and not st.session_state.submission_in_progress:
+                # 중복 제출 방지: 5초 이내 재제출 방지
+                if st.session_state.last_submission_time:
+                    time_diff = (datetime.now() - st.session_state.last_submission_time).total_seconds()
+                    if time_diff < 5:
+                        st.warning("⏳ 잠시 후 다시 시도해주세요.")
+                        st.stop()
+                
                 if gallery_name and review_text:
+                    st.session_state.submission_in_progress = True
+                    st.session_state.last_submission_time = datetime.now()
                     # 사진 업로드 처리
                     photo_url = None
                     if uploaded_file and hasattr(st.session_state, 'storage') and st.session_state.storage.client:
@@ -737,6 +753,9 @@ with tab3:
                         st.success(f"✅ {gallery_name} 후기가 등록되었습니다!")
                         st.warning(f"Padlet 연동: {str(e)}")
                     
+                    # 제출 상태 초기화
+                    st.session_state.submission_in_progress = False
+                    
                     # 위치 데이터도 업데이트
                     st.session_state.locations_data.append({
                         'name': gallery_name,
@@ -755,6 +774,7 @@ with tab3:
                     st.balloons()
                     st.rerun()
                 else:
+                    st.session_state.submission_in_progress = False
                     st.error("갤러리 이름과 후기를 입력해주세요!")
     
     with col2:
