@@ -5,16 +5,13 @@ Google Forms 대신 자체 웹폼 또는 Typeform 연동
 
 import streamlit as st
 from typing import Dict, List, Optional
-from padlet_api_complete import PadletAPI
-from css_art_map_project import CSSArtMapProject
-from fuzzywuzzy import fuzz, process
 import json
 
 class UserFriendlyInputSystem:
     """사용자가 쉽게 경험을 입력할 수 있는 시스템"""
     
     def __init__(self):
-        self.project = CSSArtMapProject()
+        pass  # CSSArtMapProject 의존성 제거
         
         # 장소명 변형 매핑 (자동완성용)
         self.location_aliases = {
@@ -41,7 +38,7 @@ class UserFriendlyInputSystem:
     def match_location(self, user_input: str) -> Optional[str]:
         """
         사용자 입력을 실제 장소명으로 매칭
-        fuzzy matching 사용
+        간단한 문자열 매칭 사용
         """
         # 정확히 일치하는 경우 먼저 체크
         user_input_lower = user_input.lower().strip()
@@ -53,18 +50,12 @@ class UserFriendlyInputSystem:
                 if user_input_lower == alias.lower():
                     return location
         
-        # Fuzzy matching (80% 이상 유사도)
-        best_match = process.extractOne(
-            user_input, 
-            self.all_location_inputs,
-            scorer=fuzz.ratio
-        )
-        
-        if best_match and best_match[1] >= 80:
-            # 매칭된 입력값이 어느 장소의 alias인지 찾기
-            matched_input = best_match[0]
-            for location, aliases in self.location_aliases.items():
-                if matched_input == location or matched_input in aliases:
+        # 부분 문자열 매칭
+        for location, aliases in self.location_aliases.items():
+            if user_input_lower in location.lower() or location.lower() in user_input_lower:
+                return location
+            for alias in aliases:
+                if user_input_lower in alias.lower() or alias.lower() in user_input_lower:
                     return location
         
         return None
@@ -137,24 +128,17 @@ class UserFriendlyInputSystem:
                 elif not title or not experience:
                     st.error("❌ 제목과 경험을 모두 입력해주세요.")
                 else:
-                    # Padlet에 게시
-                    with st.spinner("게시 중..."):
-                        result = self.project.post_visitor_experience(
-                            location_name=matched_location,
-                            title=title,
-                            experience=experience,
-                            emotion=emotion_emoji,
-                            image_url=image_url if image_url else None
-                        )
-                        
-                        if "error" not in result:
-                            st.success(f"✅ 성공적으로 공유되었습니다! 📍 {matched_location}")
-                            st.balloons()
-                            
-                            # 공유 링크 제공
-                            st.info(f"🔗 [지도에서 확인하기]({self.project.board_url})")
-                        else:
-                            st.error(f"❌ 오류가 발생했습니다: {result['error']}")
+                    # 결과 표시 (Padlet 연동 부분은 제거)
+                    st.success(f"✅ 성공적으로 저장되었습니다! 📍 {matched_location}")
+                    st.balloons()
+                    
+                    # 저장된 데이터 표시
+                    st.info(f"""
+                    📍 장소: {matched_location}
+                    {emotion_emoji} 감정: {emotion}
+                    ✏️ 제목: {title}
+                    📝 경험: {experience}
+                    """)
     
     def create_google_forms_webhook(self):
         """
