@@ -9,9 +9,13 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
 import os
+from dotenv import load_dotenv
 from user_input_system import UserFriendlyInputSystem
 from css_automated_manager import CSSArtMapAutomation
 from padlet_api_complete import PadletAPI, extract_board_id_from_url
+
+# .env 파일 로드
+load_dotenv()
 
 # 페이지 설정
 st.set_page_config(
