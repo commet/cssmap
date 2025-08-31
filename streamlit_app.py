@@ -13,6 +13,7 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
+from padlet_api_complete import PadletAPI
 
 # .env 파일 로드
 load_dotenv()
@@ -290,12 +291,97 @@ if 'total_participants' not in st.session_state:
 if 'avg_stay_time' not in st.session_state:
     st.session_state.avg_stay_time = 1.5
 
-# 메인 탭 (후기 작성을 첫 번째로)
-tab1, tab2, tab3, tab4 = st.tabs(["✍️ 후기 작성", "📊 대시보드", "🗺️ Padlet 지도", "📈 분석"])
+# 메인 탭 (사용 설명을 첫 번째로)
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📖 사용 설명", "🗺️ Padlet 지도", "✍️ 직접 작성", "📊 대시보드", "📈 분석"])
 
-# 후기 작성 탭
+# 사용 설명 탭
 with tab1:
-    st.markdown('<div class="section-title">✍️ 갤러리 방문 후기</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📖 CSS Art Map 사용 가이드</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        st.markdown("""
+        ### 🎯 프로젝트 소개
+        **"헤맨만큼 내 땅이다"**는 프리즈·키아프 2025 기간 동안 갤러리 방문 경험을 
+        공유하고 기록하는 CSS 아트 프로젝트입니다.
+        
+        ### 📝 사용 방법
+        1. **Padlet 지도 탭**: 실시간으로 업데이트되는 팀 전체의 방문 기록을 확인
+        2. **직접 작성 탭**: 갤러리 방문 후기를 작성하고 Padlet에 자동 업로드
+        3. **대시보드 탭**: 프로젝트 통계와 트렌드 확인
+        4. **분석 탭**: 상세한 데이터 분석 결과 확인
+        
+        ### 🚀 시작하기
+        - 갤러리를 방문한 후 **"직접 작성"** 탭에서 후기를 작성하세요
+        - 작성된 후기는 자동으로 Padlet 지도에 반영됩니다
+        - 다른 팀원들의 후기는 Padlet 지도에서 확인할 수 있습니다
+        """)
+        
+        st.info("""
+        💡 **Tip**: 사진을 함께 업로드하면 더욱 생생한 후기가 됩니다!
+        """)
+    
+    with col2:
+        st.markdown("""
+        ### 📅 프리즈·키아프 2025
+        - **기간**: 2025년 9월 1일 - 7일
+        - **장소**: 서울 주요 갤러리
+        
+        ### 🏛️ 주요 참여 갤러리
+        - 국제갤러리
+        - 리움미술관
+        - 아트선재센터
+        - 갤러리현대
+        - 페이스갤러리
+        - PKM갤러리
+        - 가나아트센터
+        - 학고재갤러리
+        - 프리즈서울
+        - 키아프
+        
+        ### 📊 현재 진행 상황
+        """)
+        
+        # 진행 상황 표시
+        progress = len(st.session_state.reviews) / 50 * 100  # 목표 50개 후기
+        st.metric("등록된 후기", f"{len(st.session_state.reviews)}개")
+        st.progress(min(progress / 100, 1.0))
+        st.caption(f"목표: 50개 (달성률 {progress:.0f}%)")
+
+# Padlet 지도 탭
+with tab2:
+    st.markdown('<div class="section-title">🗺️ Padlet 실시간 지도</div>', unsafe_allow_html=True)
+    
+    # Padlet URL
+    padlet_url = "https://padlet.com/CSS2025/css_-1_map-blwpq840o1u57awd"
+    
+    # Padlet iframe
+    st.components.v1.iframe(padlet_url, height=700, scrolling=True)
+    
+    # Padlet 링크 버튼
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        st.markdown(f"""
+        <a href="{padlet_url}" target="_blank" style="
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        ">
+            🔗 Padlet에서 전체화면으로 보기
+        </a>
+        """, unsafe_allow_html=True)
+
+# 직접 작성 탭 (이전 후기 작성 탭)
+with tab3:
+    st.markdown('<div class="section-title">✍️ 갤러리 방문 후기 작성</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
@@ -338,12 +424,28 @@ with tab1:
                 height=150
             )
             
+            # 사진 업로드 섹션
+            st.markdown("### 📸 사진 추가")
+            uploaded_file = st.file_uploader(
+                "전시 사진을 업로드하세요 (선택사항)",
+                type=['png', 'jpg', 'jpeg'],
+                help="최대 200MB까지 업로드 가능합니다"
+            )
+            
+            if uploaded_file is not None:
+                st.image(uploaded_file, caption="업로드된 사진", use_container_width=True)
+            
             # 추가 정보
             col_c, col_d = st.columns(2)
             with col_c:
                 visit_date = st.date_input("방문 날짜", value=date.today())
             with col_d:
-                stay_time = st.slider("체류 시간", 0.5, 5.0, 1.5, 0.5, format="%.1f시간")
+                stay_time = st.selectbox(
+                    "체류 시간",
+                    options=[0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0],
+                    format_func=lambda x: f"{int(x*60)}분" if x < 1 else f"{x:.1f}시간",
+                    index=5  # 기본값 1.5시간
+                )
             
             submit = st.form_submit_button("🚀 후기 등록", use_container_width=True)
             
@@ -358,10 +460,47 @@ with tab1:
                         'review': review_text,
                         'visit_date': visit_date,
                         'stay_time': stay_time,
+                        'photo': uploaded_file.name if uploaded_file else None,
                         'timestamp': datetime.now()
                     }
                     
                     st.session_state.reviews.append(new_review)
+                    
+                    # Padlet API로 전송
+                    try:
+                        padlet_api = PadletAPI()
+                        board_id = "blwpq840o1u57awd"  # CSS Art Map board ID
+                        
+                        # 후기 내용 포맷팅
+                        post_content = f"""
+                        📍 {gallery_name}
+                        🎨 {exhibition_name}
+                        ⭐ {'⭐' * rating}
+                        {emotion}
+                        
+                        {review_text}
+                        
+                        ⏱️ 체류시간: {stay_time}시간
+                        📅 방문일: {visit_date}
+                        """
+                        
+                        # Padlet에 포스트 생성
+                        result = padlet_api.create_post(
+                            board_id=board_id,
+                            subject=f"{gallery_name} - {exhibition_name}",
+                            body=post_content,
+                            lat=37.5665 + np.random.uniform(-0.05, 0.05),
+                            lon=126.9780 + np.random.uniform(-0.05, 0.05)
+                        )
+                        
+                        if 'error' not in result:
+                            st.success(f"✅ {gallery_name} 후기가 등록되고 Padlet에 공유되었습니다!")
+                        else:
+                            st.success(f"✅ {gallery_name} 후기가 등록되었습니다!")
+                            st.warning("Padlet 연동 중 문제가 발생했지만 로컬에는 저장되었습니다.")
+                    except Exception as e:
+                        st.success(f"✅ {gallery_name} 후기가 등록되었습니다!")
+                        st.warning(f"Padlet 연동: {str(e)}")
                     
                     # 위치 데이터도 업데이트
                     st.session_state.locations_data.append({
@@ -385,14 +524,14 @@ with tab1:
     
     with col2:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); padding: 1.5rem; border-radius: 16px; color: white;">
-            <h3 style="margin-top: 0;">💡 후기 작성 팁</h3>
-            <ul style="line-height: 2;">
-                <li>전시의 첫인상을 기록해보세요</li>
-                <li>가장 인상 깊었던 작품을 언급해주세요</li>
-                <li>관람 동선이나 전시 구성을 평가해보세요</li>
-                <li>다른 관람객을 위한 팁을 공유해주세요</li>
-                <li>사진이 있다면 더욱 생생한 후기가 됩니다</li>
+        <div style="background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); padding: 1rem; border-radius: 16px; color: white;">
+            <h4 style="margin-top: 0; font-size: 1rem;">💡 후기 작성 팁</h4>
+            <ul style="line-height: 1.4; font-size: 0.85rem; padding-left: 1.2rem; margin: 0.5rem 0;">
+                <li>전시의 첫인상 기록</li>
+                <li>인상 깊은 작품 언급</li>
+                <li>관람 동선 평가</li>
+                <li>다른 관람객 위한 팁</li>
+                <li>사진 추가로 생생함 UP</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -414,7 +553,7 @@ with tab1:
             st.info("아직 등록된 후기가 없습니다. 첫 번째 후기를 작성해보세요!")
 
 # 대시보드 탭
-with tab2:
+with tab4:
     # 실제 데이터 계산
     total_locations = len(st.session_state.locations_data)
     total_reviews = len(st.session_state.reviews)
@@ -562,44 +701,8 @@ with tab2:
         else:
             st.info("아직 데이터가 없습니다. 후기를 작성해주세요!")
 
-# Padlet 지도 탭
-with tab3:
-    st.markdown('<div class="section-title">🗺️ Padlet 실시간 지도</div>', unsafe_allow_html=True)
-    
-    # Padlet URL (실제 URL로 변경 필요)
-    padlet_url = "https://padlet.com/cssartmap/map"
-    
-    st.markdown("""
-    <div style="background: white; padding: 1rem; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin-bottom: 1rem;">
-        <p>🌐 아래는 실시간으로 업데이트되는 Padlet 지도입니다. 모든 팀원들의 방문 기록을 한눈에 볼 수 있습니다.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Padlet iframe
-    st.components.v1.iframe(padlet_url, height=600, scrolling=True)
-    
-    # Padlet 링크 버튼
-    st.markdown("<br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1,2,1])
-    with col2:
-        st.markdown(f"""
-        <a href="{padlet_url}" target="_blank" style="
-            display: block;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        ">
-            🔗 Padlet에서 전체화면으로 보기
-        </a>
-        """, unsafe_allow_html=True)
-
 # 분석 탭
-with tab4:
+with tab5:
     st.markdown('<div class="section-title">📈 상세 분석</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
