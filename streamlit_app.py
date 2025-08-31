@@ -298,56 +298,112 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["📖 사용 설명", "🗺️ Padlet �
 with tab1:
     st.markdown('<div class="section-title">📖 CSS Art Map 사용 가이드</div>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns([3, 2])
+    # 언어 선택
+    lang = st.radio("Language / 언어", ["한국어", "English"], horizontal=True)
     
-    with col1:
-        st.markdown("""
-        ### 🎯 프로젝트 소개
-        **"헤맨만큼 내 땅이다"**는 프리즈·키아프 2025 기간 동안 갤러리 방문 경험을 
-        공유하고 기록하는 CSS 아트 프로젝트입니다.
+    if lang == "한국어":
+        col1, col2 = st.columns([3, 2])
         
-        ### 📝 사용 방법
-        1. **Padlet 지도 탭**: 실시간으로 업데이트되는 팀 전체의 방문 기록을 확인
-        2. **직접 작성 탭**: 갤러리 방문 후기를 작성하고 Padlet에 자동 업로드
-        3. **대시보드 탭**: 프로젝트 통계와 트렌드 확인
-        4. **분석 탭**: 상세한 데이터 분석 결과 확인
+        with col1:
+            st.markdown("""
+            ### 🎯 프로젝트 소개
+            **"헤맨만큼 내 땅이다"**는 프리즈·키아프 2025 기간 동안 갤러리 방문 경험을 
+            공유하고 기록하는 CSS 아트 프로젝트입니다.
+            
+            ### 📝 사용 방법
+            1. **Padlet 지도 탭**: 실시간으로 업데이트되는 팀 전체의 방문 기록을 확인
+            2. **직접 작성 탭**: 갤러리 방문 후기를 작성하고 Padlet에 자동 업로드
+            3. **대시보드 탭**: 프로젝트 통계와 트렌드 확인
+            4. **분석 탭**: 상세한 데이터 분석 결과 확인
+            
+            ### 🚀 시작하기
+            - 갤러리를 방문한 후 **"직접 작성"** 탭에서 후기를 작성하세요
+            - 작성된 후기는 자동으로 Padlet 지도에 반영됩니다
+            - 다른 팀원들의 후기는 Padlet 지도에서 확인할 수 있습니다
+            """)
+            
+            st.info("""
+            💡 **Tip**: 사진을 함께 업로드하면 더욱 생생한 후기가 됩니다!
+            """)
         
-        ### 🚀 시작하기
-        - 갤러리를 방문한 후 **"직접 작성"** 탭에서 후기를 작성하세요
-        - 작성된 후기는 자동으로 Padlet 지도에 반영됩니다
-        - 다른 팀원들의 후기는 Padlet 지도에서 확인할 수 있습니다
-        """)
-        
-        st.info("""
-        💡 **Tip**: 사진을 함께 업로드하면 더욱 생생한 후기가 됩니다!
-        """)
+        with col2:
+            st.markdown("""
+            ### 📅 프리즈·키아프 2025
+            - **기간**: 2025년 9월 1일 - 7일
+            - **장소**: 서울 주요 갤러리
+            
+            ### 🏛️ 주요 참여 갤러리
+            - 국제갤러리
+            - 리움미술관
+            - 아트선재센터
+            - 갤러리현대
+            - 페이스갤러리
+            - PKM갤러리
+            - 가나아트센터
+            - 학고재갤러리
+            - 프리즈서울
+            - 키아프
+            
+            ### 📊 현재 진행 상황
+            """)
+            
+            # 진행 상황 표시
+            progress = len(st.session_state.reviews) / 50 * 100  # 목표 50개 후기
+            st.metric("등록된 후기", f"{len(st.session_state.reviews)}개")
+            st.progress(min(progress / 100, 1.0))
+            st.caption(f"목표: 50개 (달성률 {progress:.0f}%)")
     
-    with col2:
-        st.markdown("""
-        ### 📅 프리즈·키아프 2025
-        - **기간**: 2025년 9월 1일 - 7일
-        - **장소**: 서울 주요 갤러리
+    else:  # English
+        col1, col2 = st.columns([3, 2])
         
-        ### 🏛️ 주요 참여 갤러리
-        - 국제갤러리
-        - 리움미술관
-        - 아트선재센터
-        - 갤러리현대
-        - 페이스갤러리
-        - PKM갤러리
-        - 가나아트센터
-        - 학고재갤러리
-        - 프리즈서울
-        - 키아프
+        with col1:
+            st.markdown("""
+            ### 🎯 Project Introduction
+            **"As Much Land as I Wandered"** is a CSS art project that shares and records 
+            gallery visit experiences during Frieze·KIAF 2025.
+            
+            ### 📝 How to Use
+            1. **Padlet Map Tab**: View real-time updates of team visits
+            2. **Write Review Tab**: Write gallery reviews and auto-upload to Padlet
+            3. **Dashboard Tab**: Check project statistics and trends
+            4. **Analysis Tab**: View detailed data analysis
+            
+            ### 🚀 Getting Started
+            - After visiting a gallery, write a review in the **"Write Review"** tab
+            - Your review will be automatically reflected on the Padlet map
+            - Check other team members' reviews on the Padlet map
+            """)
+            
+            st.info("""
+            💡 **Tip**: Upload photos for more vivid reviews!
+            """)
         
-        ### 📊 현재 진행 상황
-        """)
-        
-        # 진행 상황 표시
-        progress = len(st.session_state.reviews) / 50 * 100  # 목표 50개 후기
-        st.metric("등록된 후기", f"{len(st.session_state.reviews)}개")
-        st.progress(min(progress / 100, 1.0))
-        st.caption(f"목표: 50개 (달성률 {progress:.0f}%)")
+        with col2:
+            st.markdown("""
+            ### 📅 Frieze·KIAF 2025
+            - **Period**: September 1-7, 2025
+            - **Location**: Major galleries in Seoul
+            
+            ### 🏛️ Participating Galleries
+            - Kukje Gallery
+            - Leeum Museum
+            - Art Sonje Center
+            - Gallery Hyundai
+            - Pace Gallery
+            - PKM Gallery
+            - Gana Art Center
+            - Hakgojae Gallery
+            - Frieze Seoul
+            - KIAF
+            
+            ### 📊 Current Progress
+            """)
+            
+            # Progress display
+            progress = len(st.session_state.reviews) / 50 * 100  # Target: 50 reviews
+            st.metric("Reviews Posted", f"{len(st.session_state.reviews)}")
+            st.progress(min(progress / 100, 1.0))
+            st.caption(f"Target: 50 (Achievement: {progress:.0f}%)")
 
 # Padlet 지도 탭
 with tab2:
@@ -429,11 +485,12 @@ with tab3:
             uploaded_file = st.file_uploader(
                 "전시 사진을 업로드하세요 (선택사항)",
                 type=['png', 'jpg', 'jpeg'],
-                help="최대 200MB까지 업로드 가능합니다"
+                help="⚠️ 주의: 현재 사진은 미리보기용으로만 표시되며, 서버에 저장되지 않습니다. Padlet에 직접 업로드하려면 Padlet 사이트를 이용해주세요."
             )
             
             if uploaded_file is not None:
-                st.image(uploaded_file, caption="업로드된 사진", use_container_width=True)
+                st.image(uploaded_file, caption="업로드된 사진 (미리보기)", use_container_width=True)
+                st.info("📌 사진은 현재 세션에서만 표시되며 서버에 저장되지 않습니다.")
             
             # 추가 정보
             col_c, col_d = st.columns(2)
@@ -527,11 +584,11 @@ with tab3:
         <div style="background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); padding: 1rem; border-radius: 16px; color: white;">
             <h4 style="margin-top: 0; font-size: 1rem;">💡 후기 작성 팁</h4>
             <ul style="line-height: 1.4; font-size: 0.85rem; padding-left: 1.2rem; margin: 0.5rem 0;">
-                <li>전시의 첫인상 기록</li>
-                <li>인상 깊은 작품 언급</li>
-                <li>관람 동선 평가</li>
-                <li>다른 관람객 위한 팁</li>
-                <li>사진 추가로 생생함 UP</li>
+                <li>전시의 첫인상을 기록해보세요</li>
+                <li>가장 인상 깊었던 작품을 언급해주세요</li>
+                <li>관람 동선이나 전시 구성을 평가해보세요</li>
+                <li>다른 관람객을 위한 팁을 공유해주세요</li>
+                <li>사진이 있다면 더욱 생생한 후기가 됩니다</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
