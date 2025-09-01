@@ -857,7 +857,7 @@ with tab3:
                             st.warning("Padlet 연동 중 문제가 발생했지만 로컬에는 저장되었습니다.")
                     except Exception as e:
                         st.success(f"✅ {gallery_name} 후기가 등록되었습니다!")
-                        st.warning(f"⏳ 잠시 후 다시 시도해주세요. Padlet 지도에 직접 등록해주시면 감사드리겠습니다!")
+                        st.warning(f"⏳ 잠시 후 다시 시도해주세요. 반복 시 Padlet 지도를 이용해주세요.")
                     
                     # 제출 상태 초기화
                     st.session_state.submission_in_progress = False
