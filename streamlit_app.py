@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 from padlet_api_complete import PadletAPI
 from supabase_storage import SupabaseStorage
+from updated_locations import COMPLETE_GALLERY_LOCATIONS
 
 # .env 파일 로드
 load_dotenv()
@@ -281,6 +282,83 @@ st.markdown("""
     <p class="header-subtitle">Curating School Seoul | 프리즈·키아프 미술주간 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
+# 갤러리 이름을 정규화하는 함수
+def normalize_gallery_name(gallery_name):
+    """갤러리 이름을 정규화하여 COMPLETE_GALLERY_LOCATIONS와 매칭"""
+    # 괄호 안 내용 제거 (예: "프리즈 서울 (COEX)" -> "프리즈 서울")
+    normalized = gallery_name.split('(')[0].strip()
+    
+    # 매핑 테이블
+    name_mapping = {
+        "프리즈 서울": "코엑스",
+        "키아프": "코엑스",
+        "국제갤러리": "국제갤러리",
+        "갤러리 진선": "갤러리진선",
+        "예화랑": "예화랑",
+        "우손갤러리 서울": "우손갤러리",
+        "이화익갤러리": "이화익갤러리",
+        "초이앤초이 갤러리": "초이앤초이갤러리",
+        "갤러리현대": "갤러리현대",
+        "학고재": "학고재",
+        "바라캇 컨템포러리": "바라캇컨템포러리",
+        "BAIK ART Seoul": "백아트",
+        "갤러리 조선": "갤러리조선",
+        "아라리오갤러리 서울": "아라리오갤러리",
+        "아트선재센터": "아트선재센터",
+        "재단법인 예울": "여재단",
+        "전혁림 (포즈뮤지엄사진)": "전혁림",
+        "(ICA) 우양미술관·더성북도원미술관": "우양미술관",
+        "(삼청) PKM갤러리": "PKM갤러리",
+        "갤러리 가이아": "갤러리가이아",
+        "갤러리 그라프": "갤러리그라프",
+        "김리아갤러리": "김리아갤러리",
+        "갤러리 피치": "갤러리피치",
+        "갤러리 플래닛": "갤러리플래닛",
+        "갤러리위 청담": "갤러리위청담",
+        "Gladstone Gallery Seoul": "글래드스톤갤러리",
+        "White Cube Seoul": "화이트큐브서울",
+        "페로탕": "페로탕",
+        "G Gallery 지갤러리": "G갤러리",
+        "LEE EUGEAN GALLERY 이유진갤러리": "이유진갤러리",
+        "송은": "송은아트스페이스",
+        "아뜰리에 에르메스": "아뜰리에에르메스",
+        "BHAK": "바크",
+        "갤러리 SP": "갤러리SP",
+        "갤러리조은": "갤러리조은",
+        "가나아트 한남": "가나아트한남",
+        "리만머핀": "리만머핀",
+        "에스더쉬퍼": "에스더쉬퍼",
+        "타데우스 로팍 서울": "타데우스로팍",
+        "갤러리바톤": "갤러리바톤",
+        "디스위켄드룸": "디스위켄드룸",
+        "ThisWeekendRoom": "디스위켄드룸",
+        "조현화랑 서울": "조현화랑",
+        "P21": "P21",
+        "실린더2": "실린더2",
+        "두아르트 스퀘이라 서울": "두아르트",
+        "양혜규스튜디오": "양혜규스튜디오",
+        "리움미술관": "리움미술관",
+        "PKM갤러리": "PKM갤러리",
+        "페이스갤러리": "페이스갤러리",
+        "가나아트센터": "가나아트센터",
+        "대림미술관": "대림미술관",
+        "삼성미술관": "리움미술관"
+    }
+    
+    return name_mapping.get(normalized, normalized)
+
+def get_gallery_location(gallery_name):
+    """갤러리 이름으로 실제 위치 정보 가져오기"""
+    normalized_name = normalize_gallery_name(gallery_name)
+    
+    # COMPLETE_GALLERY_LOCATIONS에서 위치 정보 찾기
+    if normalized_name in COMPLETE_GALLERY_LOCATIONS:
+        location = COMPLETE_GALLERY_LOCATIONS[normalized_name]
+        return location["lat"], location["lng"]
+    
+    # 못 찾으면 서울 중심부 좌표 반환 (폴백)
+    return 37.5665, 126.9780
 
 # 세션 상태 초기화
 if 'locations_data' not in st.session_state:
@@ -718,14 +796,20 @@ with tab3:
                         if photo_url:
                             post_content += f"\n\n📸 사진 보기: {photo_url}"
                         
+                        # 실제 갤러리 위치 가져오기
+                        lat, lng = get_gallery_location(gallery_name)
+                        
                         # Padlet에 포스트 생성 (attachment_url 파라미터 사용)
                         result = padlet_api.create_post(
                             board_id=board_id,
                             subject=f"{gallery_name} - {exhibition_name}",
                             body=post_content,
                             attachment_url=photo_url,  # 사진 URL 추가
-                            map_props={"lat": 37.5665 + np.random.uniform(-0.05, 0.05),
-                                      "lon": 126.9780 + np.random.uniform(-0.05, 0.05)}
+                            map_props={
+                                "latitude": lat, 
+                                "longitude": lng,
+                                "locationName": gallery_name
+                            }  # 올바른 키 이름으로 GPS 좌표 전달
                         )
                         
                         if 'error' not in result:
@@ -735,13 +819,14 @@ with tab3:
                             st.warning("Padlet 연동 중 문제가 발생했지만 로컬에는 저장되었습니다.")
                     except Exception as e:
                         st.success(f"✅ {gallery_name} 후기가 등록되었습니다!")
-                        st.warning(f"Padlet 연동: {str(e)}")
+                        st.warning(f"⏳ 잠시 후 다시 시도해주세요. Padlet 지도에 직접 등록해주시면 감사드리겠습니다!")
                     
-                    # 위치 데이터도 업데이트
+                    # 실제 위치로 데이터 업데이트
+                    lat, lng = get_gallery_location(gallery_name)
                     st.session_state.locations_data.append({
                         'name': gallery_name,
-                        'lat': 37.5665 + np.random.uniform(-0.05, 0.05),
-                        'lon': 126.9780 + np.random.uniform(-0.05, 0.05),
+                        'lat': lat,
+                        'lon': lng,
                         'emotion': emotion,
                         'notes': review_text[:100],
                         'timestamp': datetime.now()
