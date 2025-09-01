@@ -1,0 +1,117 @@
+"""
+갤러리별 실제 좌표 매핑
+Gallery coordinates mapping for accurate Padlet map display
+"""
+
+GALLERY_COORDINATES = {
+    # 아트 페어
+    "프리즈 서울 (COEX)": {"lat": 37.5133, "lon": 127.0592},
+    "키아프 (COEX)": {"lat": 37.5133, "lon": 127.0592},
+    
+    # 삼청 나잇 갤러리들
+    "국제갤러리": {"lat": 37.5800, "lon": 126.9749},
+    "갤러리현대": {"lat": 37.5789, "lon": 126.9747},
+    "학고재": {"lat": 37.5796, "lon": 126.9741},
+    "아라리오갤러리 서울": {"lat": 37.5809, "lon": 126.9737},
+    "바라캇 컨템포러리": {"lat": 37.5793, "lon": 126.9750},
+    "갤러리 진선": {"lat": 37.5804, "lon": 126.9753},
+    "예화랑": {"lat": 37.5806, "lon": 126.9745},
+    "우손갤러리 서울": {"lat": 37.5798, "lon": 126.9755},
+    "이화익갤러리": {"lat": 37.5802, "lon": 126.9743},
+    "초이앤초이 갤러리": {"lat": 37.5795, "lon": 126.9752},
+    "BAIK ART Seoul": {"lat": 37.5791, "lon": 126.9748},
+    "갤러리 조선": {"lat": 37.5799, "lon": 126.9746},
+    "아트선재센터": {"lat": 37.5788, "lon": 126.9742},
+    "재단법인 예울": {"lat": 37.5807, "lon": 126.9740},
+    "전혁림 (포즈뮤지엄사진)": {"lat": 37.5801, "lon": 126.9751},
+    "(ICA) 우양미술관·더성북도원미술관": {"lat": 37.5794, "lon": 126.9738},
+    "(삼청) PKM갤러리": {"lat": 37.5797, "lon": 126.9744},
+    
+    # 청담 나잇 갤러리들
+    "송은": {"lat": 37.5229, "lon": 127.0379},
+    "아뜰리에 에르메스": {"lat": 37.5264, "lon": 127.0295},
+    "페로탕": {"lat": 37.5245, "lon": 127.0401},
+    "Gladstone Gallery Seoul": {"lat": 37.5238, "lon": 127.0423},
+    "White Cube Seoul": {"lat": 37.5231, "lon": 127.0411},
+    "갤러리 가이아": {"lat": 37.5250, "lon": 127.0389},
+    "갤러리 그라프": {"lat": 37.5242, "lon": 127.0397},
+    "김리아갤러리": {"lat": 37.5235, "lon": 127.0405},
+    "갤러리 피치": {"lat": 37.5248, "lon": 127.0393},
+    "갤러리 플래닛": {"lat": 37.5237, "lon": 127.0399},
+    "갤러리위 청담": {"lat": 37.5243, "lon": 127.0387},
+    "G Gallery 지갤러리": {"lat": 37.5246, "lon": 127.0395},
+    "LEE EUGEAN GALLERY 이유진갤러리": {"lat": 37.5240, "lon": 127.0403},
+    
+    # 한남 나잇 갤러리들
+    "BHAK": {"lat": 37.5342, "lon": 127.0045},
+    "가나아트 한남": {"lat": 37.5348, "lon": 127.0051},
+    "리만머핀": {"lat": 37.5345, "lon": 127.0048},
+    "타데우스 로팍 서울": {"lat": 37.5351, "lon": 127.0042},
+    "갤러리바톤": {"lat": 37.5339, "lon": 127.0054},
+    "에스더쉬퍼": {"lat": 37.5343, "lon": 127.0039},
+    "조현화랑 서울": {"lat": 37.5350, "lon": 127.0046},
+    "갤러리 SP": {"lat": 37.5337, "lon": 127.0057},
+    "갤러리조은": {"lat": 37.5341, "lon": 127.0050},
+    "디스위켄드룸": {"lat": 37.5346, "lon": 127.0043},
+    "ThisWeekendRoom": {"lat": 37.5346, "lon": 127.0043},
+    "P21": {"lat": 37.5344, "lon": 127.0052},
+    "실린더2": {"lat": 37.5338, "lon": 127.0055},
+    "두아르트 스퀘이라 서울": {"lat": 37.5347, "lon": 127.0041},
+    
+    # 을지로 나잇
+    "양혜규스튜디오": {"lat": 37.5665, "lon": 126.9910},
+    
+    # 이 기간 전국 갤러리
+    "리움미술관": {"lat": 37.5384, "lon": 126.9994},
+    "PKM갤러리": {"lat": 37.5797, "lon": 126.9744},
+    "페이스갤러리": {"lat": 37.5385, "lon": 126.9995},
+    "가나아트센터": {"lat": 37.5763, "lon": 126.9736},
+    "대림미술관": {"lat": 37.5411, "lon": 127.0065},
+    "삼성미술관": {"lat": 37.5384, "lon": 126.9994}
+}
+
+# 지역별 대표 좌표 (직접 입력 갤러리용)
+AREA_COORDINATES = {
+    "삼청동": {"lat": 37.5800, "lon": 126.9750},
+    "청담동": {"lat": 37.5240, "lon": 127.0400},
+    "한남동": {"lat": 37.5345, "lon": 127.0048},
+    "강남": {"lat": 37.4979, "lon": 127.0276},
+    "홍대": {"lat": 37.5563, "lon": 126.9219},
+    "성수동": {"lat": 37.5447, "lon": 127.0557},
+    "이태원": {"lat": 37.5340, "lon": 126.9948},
+    "기타 서울": {"lat": 37.5665, "lon": 126.9780}  # 서울시청
+}
+
+def get_gallery_coordinates(gallery_name, custom_location=None):
+    """
+    갤러리 이름으로 좌표 반환
+    Returns coordinates for a gallery name
+    
+    Args:
+        gallery_name (str): 갤러리 이름
+        custom_location (str, optional): 직접 입력 갤러리의 지역명
+        
+    Returns:
+        dict: {"lat": float, "lon": float} or None if not found
+    """
+    # 정확한 매칭 시도
+    if gallery_name in GALLERY_COORDINATES:
+        return GALLERY_COORDINATES[gallery_name]
+    
+    # 부분 매칭 시도 (갤러리 이름이 포함된 경우)
+    for gallery, coords in GALLERY_COORDINATES.items():
+        if gallery_name in gallery or gallery in gallery_name:
+            return coords
+    
+    # 직접 입력 갤러리의 경우 지역별 좌표 사용
+    if custom_location and custom_location in AREA_COORDINATES:
+        # 약간의 랜덤 오프셋 추가 (같은 지역 내 구분을 위해)
+        import random
+        base_coords = AREA_COORDINATES[custom_location]
+        return {
+            "lat": base_coords["lat"] + random.uniform(-0.003, 0.003),
+            "lon": base_coords["lon"] + random.uniform(-0.003, 0.003)
+        }
+    
+    # 기본값: 서울 중심부 (삼청동 근처)
+    return {"lat": 37.5800, "lon": 126.9750}
