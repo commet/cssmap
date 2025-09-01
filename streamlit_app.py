@@ -358,8 +358,8 @@ def get_gallery_location(gallery_name):
         location = COMPLETE_GALLERY_LOCATIONS[normalized_name]
         return location["lat"], location["lng"]
     
-    # 못 찾으면 서울 중심부 좌표 반환 (폴백)
-    return 37.5665, 126.9780
+    # 못 찾으면 삼청동 중심 좌표 반환 (폴백)
+    return 37.5789, 126.9770
 
 # 세션 상태 초기화
 if 'locations_data' not in st.session_state:
@@ -830,9 +830,12 @@ with tab3:
                         lat, lng = get_gallery_location(gallery_name)
                         
                         # 못 찾으면 gallery_coordinates에서 시도
-                        if lat == 37.5665 and lng == 126.9780:  # 기본 좌표인 경우
+                        if lat == 37.5789 and lng == 126.9770:  # 기본 좌표인 경우 (삼청동 중심)
                             gallery_coords = get_gallery_coordinates(gallery_name, custom_location)
                             lat, lng = gallery_coords["lat"], gallery_coords["lon"]
+                        
+                        # 디버그: 실제 전송되는 좌표 확인
+                        st.info(f"📍 전송 좌표 확인: {gallery_name} -> 위도: {lat}, 경도: {lng}")
                         
                         # Padlet에 포스트 생성 (attachment_url 파라미터 사용)
                         result = padlet_api.create_post(
