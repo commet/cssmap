@@ -385,7 +385,8 @@ def fetch_padlet_data():
     try:
         # 마지막 fetch로부터 15분이 지났는지 체크
         if st.session_state.last_padlet_fetch:
-            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 900:
+            time_diff = (datetime.now() - st.session_state.last_padlet_fetch).total_seconds()
+            if time_diff < 900:
                 return  # 15분 이내면 다시 가져오지 않음
         
         padlet_api = PadletAPI()
@@ -436,9 +437,12 @@ def fetch_padlet_data():
         
         st.session_state.last_padlet_fetch = datetime.now()
         
+        # 디버깅을 위한 로그 (성공 시만 표시)
+        return True
+        
     except Exception as e:
         # 에러가 있어도 앱이 중단되지 않도록
-        pass
+        return False
 
 # 메인 탭 (사용 설명을 첫 번째로)
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📖 사용 설명", "🗺️ Padlet 지도", "✍️ 직접 작성", "📊 대시보드", "📈 분석"])
@@ -937,34 +941,34 @@ with tab3:
 # 대시보드 탭
 with tab4:
     # Padlet 데이터 가져오기
-    fetch_padlet_data()
+    fetch_success = fetch_padlet_data()
     
     # 실제 데이터 계산 (로컬 + Padlet 데이터)
     # 고유 장소 계산 (중복 제거)
     unique_locations = set()
     for review in st.session_state.reviews:
-        unique_locations.add(review.get('gallery', ''))
+        gallery = review.get('gallery', '')
+        if gallery:
+            unique_locations.add(gallery)
     for padlet_post in st.session_state.padlet_data:
-        unique_locations.add(padlet_post.get('gallery', ''))
+        gallery = padlet_post.get('gallery', '')
+        if gallery and gallery != '갤러리':  # 기본값 제외
+            unique_locations.add(gallery)
     
-    total_locations = len(unique_locations) if unique_locations else 0
+    total_locations = len(unique_locations)
     total_reviews = len(st.session_state.reviews) + len(st.session_state.padlet_data)
     
     # 참여 인원 계산 (Padlet 포스트 수 기반 추정)
-    total_participants = max(len(st.session_state.padlet_data), st.session_state.total_participants)
-    
-    # 평균 체류시간 (기본값 또는 실제 데이터)
-    if len(st.session_state.reviews) > 0:
-        avg_stay_time = sum(r.get('stay_time', 1.5) for r in st.session_state.reviews) / len(st.session_state.reviews)
-    else:
-        avg_stay_time = 1.5  # 기본값
+    total_participants = max(len(st.session_state.padlet_data), st.session_state.total_participants, 1)
     
     # Padlet 데이터 동기화 상태 표시
-    if st.session_state.last_padlet_fetch:
-        st.caption(f"🔄 Padlet 동기화: {st.session_state.last_padlet_fetch.strftime('%H:%M')} (로컬: {len(st.session_state.reviews)}개, Padlet: {len(st.session_state.padlet_data)}개)")
+    if fetch_success and len(st.session_state.padlet_data) > 0:
+        st.success(f"✅ Padlet 데이터 연동 성공: {len(st.session_state.padlet_data)}개의 포스트를 불러왔습니다.")
+    elif st.session_state.last_padlet_fetch:
+        st.caption(f"🔄 마지막 동기화: {st.session_state.last_padlet_fetch.strftime('%H:%M')} (Padlet: {len(st.session_state.padlet_data)}개)")
     
-    # 주요 지표 카드
-    col1, col2, col3, col4 = st.columns(4)
+    # 주요 지표 카드 (3개로 줄임)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown(f"""
@@ -999,18 +1003,6 @@ with tab4:
             <div class="stat-label">참여 인원</div>
             <div class="stat-value">{total_participants}</div>
             <div class="stat-change change-positive">프로젝트 참여자</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f"""
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1);">
-                ⏱️
-            </div>
-            <div class="stat-label">평균 체류시간</div>
-            <div class="stat-value">{avg_stay_time:.1f}h</div>
-            <div class="stat-change change-positive">장소당 평균</div>
         </div>
         """, unsafe_allow_html=True)
     
