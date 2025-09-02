@@ -383,10 +383,10 @@ if 'last_submission_time' not in st.session_state:
 def fetch_padlet_data():
     """Padlet에서 데이터를 가져와서 로컬 데이터와 동기화"""
     try:
-        # 마지막 fetch로부터 5분이 지났는지 체크
+        # 마지막 fetch로부터 1분이 지났는지 체크 (더 자주 업데이트)
         if st.session_state.last_padlet_fetch:
-            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 300:
-                return  # 5분 이내면 다시 가져오지 않음
+            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 60:
+                return  # 1분 이내면 다시 가져오지 않음
         
         padlet_api = PadletAPI()
         board_id = "blwpq840o1u57awd"
@@ -397,20 +397,40 @@ def fetch_padlet_data():
         if 'data' in board_data and 'included' in board_data:
             posts = board_data['included']
             
+            # 기존 데이터 초기화 후 새로 로드
+            st.session_state.padlet_data = []
+            
             # Padlet 포스트를 reviews 형식으로 변환
             for post in posts:
                 if post.get('type') == 'posts':
                     attributes = post.get('attributes', {})
                     
-                    # 이미 있는 데이터인지 체크 (중복 방지)
-                    post_id = post.get('id')
-                    if not any(r.get('padlet_id') == post_id for r in st.session_state.padlet_data):
-                        padlet_review = {
-                            'padlet_id': post_id,
-                            'gallery': attributes.get('subject', '갤러리'),
-                            'review': attributes.get('body', ''),
-                            'timestamp': attributes.get('created_at', datetime.now()),
-                            'from_padlet': True
+                    # 위치 정보 파싱
+                    location = attributes.get('location', {})
+                    lat = location.get('latitude')
+                    lng = location.get('longitude')
+                    
+                    # 감정 이모지 파싱 (본문에서 추출)
+                    body = attributes.get('body', '')
+                    emotion = '👍 만족'
+                    if '😍' in body:
+                        emotion = '😍 감동'
+                    elif '😴' in body:
+                        emotion = '😴 지루'
+                    elif '💸' in body:
+                        emotion = '💸 가격'
+                    elif '🤔' in body:
+                        emotion = '🤔 고민'
+                    
+                    padlet_review = {
+                        'padlet_id': post.get('id'),
+                        'gallery': attributes.get('subject', '갤러리'),
+                        'review': body,
+                        'timestamp': attributes.get('created_at', datetime.now()),
+                        'emotion': emotion,
+                        'latitude': lat,
+                        'longitude': lng,
+                        'from_padlet': True
                         }
                         st.session_state.padlet_data.append(padlet_review)
         
@@ -920,10 +940,24 @@ with tab4:
     fetch_padlet_data()
     
     # 실제 데이터 계산 (로컬 + Padlet 데이터)
-    total_locations = len(st.session_state.locations_data)
+    # 고유 장소 계산 (중복 제거)
+    unique_locations = set()
+    for review in st.session_state.reviews:
+        unique_locations.add(review.get('gallery', ''))
+    for padlet_post in st.session_state.padlet_data:
+        unique_locations.add(padlet_post.get('gallery', ''))
+    
+    total_locations = len(unique_locations) if unique_locations else 0
     total_reviews = len(st.session_state.reviews) + len(st.session_state.padlet_data)
-    total_participants = st.session_state.total_participants
-    avg_stay_time = st.session_state.avg_stay_time
+    
+    # 참여 인원 계산 (Padlet 포스트 수 기반 추정)
+    total_participants = max(len(st.session_state.padlet_data), st.session_state.total_participants)
+    
+    # 평균 체류시간 (기본값 또는 실제 데이터)
+    if len(st.session_state.reviews) > 0:
+        avg_stay_time = sum(r.get('stay_time', 1.5) for r in st.session_state.reviews) / len(st.session_state.reviews)
+    else:
+        avg_stay_time = 1.5  # 기본값
     
     # Padlet 데이터 동기화 상태 표시
     if st.session_state.last_padlet_fetch:
@@ -995,11 +1029,37 @@ with tab4:
         # 날짜 범위 생성
         dates = pd.date_range(start=start_date, end=today, freq='D')
         
-        # 실제 방문 데이터가 있으면 사용, 없으면 샘플 데이터
-        if len(st.session_state.locations_data) > 0:
-            visits = [np.random.randint(1, 5) for _ in range(len(dates))]
-        else:
-            visits = [0] * len(dates)
+        # 날짜별 방문 데이터 집계
+        daily_visits = {}
+        
+        # Padlet 데이터에서 날짜별 집계
+        for post in st.session_state.padlet_data:
+            try:
+                if isinstance(post.get('timestamp'), str):
+                    post_date = pd.to_datetime(post['timestamp']).date()
+                else:
+                    post_date = post.get('timestamp', datetime.now()).date()
+                
+                if post_date in daily_visits:
+                    daily_visits[post_date] += 1
+                else:
+                    daily_visits[post_date] = 1
+            except:
+                continue
+        
+        # 로컬 데이터에서 날짜별 집계
+        for review in st.session_state.reviews:
+            review_date = review.get('timestamp', datetime.now()).date()
+            if review_date in daily_visits:
+                daily_visits[review_date] += 1
+            else:
+                daily_visits[review_date] = 1
+        
+        # 날짜 리스트에 맞춰 방문 수 배열 생성
+        visits = []
+        for d in dates:
+            date_key = d.date()
+            visits.append(daily_visits.get(date_key, 0))
         
         df = pd.DataFrame({'Date': dates, 'Visits': visits})
         
@@ -1046,16 +1106,28 @@ with tab4:
     with col2:
         st.markdown('<div class="section-title">🏆 인기 장소</div>', unsafe_allow_html=True)
         
-        if len(st.session_state.reviews) > 0:
-            # 실제 데이터 기반 인기 장소
-            gallery_counts = {}
-            for review in st.session_state.reviews:
-                gallery = review['gallery']
+        # 모든 데이터(로컬 + Padlet)에서 인기 장소 집계
+        gallery_counts = {}
+        
+        # Padlet 데이터 집계
+        for post in st.session_state.padlet_data:
+            gallery = post.get('gallery', '')
+            if gallery and gallery != '갤러리':
                 if gallery in gallery_counts:
                     gallery_counts[gallery] += 1
                 else:
                     gallery_counts[gallery] = 1
-            
+        
+        # 로컬 데이터 집계
+        for review in st.session_state.reviews:
+            gallery = review.get('gallery', '')
+            if gallery:
+                if gallery in gallery_counts:
+                    gallery_counts[gallery] += 1
+                else:
+                    gallery_counts[gallery] = 1
+        
+        if gallery_counts:
             sorted_galleries = sorted(gallery_counts.items(), key=lambda x: x[1], reverse=True)[:5]
             
             for i, (gallery, count) in enumerate(sorted_galleries, 1):
@@ -1071,7 +1143,8 @@ with tab4:
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.info("아직 데이터가 없습니다. 후기를 작성해주세요!")
+            # 데이터가 없을 때 기본 표시
+            st.info("📊 Padlet 데이터를 불러오는 중입니다...\n잠시 후 다시 확인해주세요.")
 
 # 분석 탭
 with tab5:
