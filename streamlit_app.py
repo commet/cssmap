@@ -431,8 +431,8 @@ def fetch_padlet_data():
                         'latitude': lat,
                         'longitude': lng,
                         'from_padlet': True
-                        }
-                        st.session_state.padlet_data.append(padlet_review)
+                    }
+                    st.session_state.padlet_data.append(padlet_review)
         
         st.session_state.last_padlet_fetch = datetime.now()
         
