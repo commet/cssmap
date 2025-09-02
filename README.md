@@ -36,6 +36,8 @@ PADLET_API_KEY=your_api_key_here
 
 ## 💻 사용법
 
+### 📺 사용 안내 영상: https://buly.kr/1xzE29j
+
 ### 1. 테스트 실행
 ```bash
 python test_padlet_now.py
