@@ -383,10 +383,10 @@ if 'last_submission_time' not in st.session_state:
 def fetch_padlet_data():
     """Padlet에서 데이터를 가져와서 로컬 데이터와 동기화"""
     try:
-        # 마지막 fetch로부터 1분이 지났는지 체크 (더 자주 업데이트)
+        # 마지막 fetch로부터 15분이 지났는지 체크
         if st.session_state.last_padlet_fetch:
-            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 60:
-                return  # 1분 이내면 다시 가져오지 않음
+            if (datetime.now() - st.session_state.last_padlet_fetch).seconds < 900:
+                return  # 15분 이내면 다시 가져오지 않음
         
         padlet_api = PadletAPI()
         board_id = "blwpq840o1u57awd"
