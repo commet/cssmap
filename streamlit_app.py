@@ -1017,6 +1017,159 @@ with tab4:
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # 특별 섹션 추가
+    st.markdown('<div class="section-title">✨ 특별한 기록들</div>', unsafe_allow_html=True)
+    
+    # 모든 후기 데이터 수집 (Padlet + 로컬)
+    all_reviews = []
+    for post in st.session_state.padlet_data:
+        if post.get('review'):
+            all_reviews.append(post)
+    for review in st.session_state.reviews:
+        if review.get('review'):
+            all_reviews.append(review)
+    
+    if all_reviews:
+        import re
+        from collections import Counter
+        import math
+        
+        # 서울 시청 좌표 (거리 계산 기준점)
+        seoul_lat, seoul_lon = 37.5665, 126.9780
+        
+        # 거리 계산 함수 (Haversine formula)
+        def calculate_distance(lat1, lon1, lat2, lon2):
+            R = 6371  # 지구 반지름 (km)
+            lat1_rad = math.radians(lat1)
+            lat2_rad = math.radians(lat2)
+            delta_lat = math.radians(lat2 - lat1)
+            delta_lon = math.radians(lon2 - lon1)
+            
+            a = math.sin(delta_lat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon/2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+            return R * c
+        
+        # 1. 가장 많이 나온 단어 분석
+        all_text = " ".join([r.get('review', '') for r in all_reviews])
+        # HTML 태그 제거
+        all_text = re.sub('<.*?>', '', all_text)
+        # 한글, 영문, 숫자만 추출
+        words = re.findall(r'[가-힣]+|[a-zA-Z]+', all_text.lower())
+        # 불용어 제거
+        stopwords = {'은', '는', '이', '가', '을', '를', '에', '의', '와', '과', '도', '로', '으로', '만', '라서', '하고', '지만', '에서', '으로서', '부터', '까지', '이고', '이며', '이나', '나', '고', '를', '을', '은', '는', '이', '가', '의', '에', '에서', '로', '으로', '와', '과', '한', '하는', '할', '해', '했', '하고', '하는', '된', '되는', '되고', '되어', '됩니다', '합니다', '있습니다', '있다', '있고', '없다', '있는', '있어', '같은', '같다', 'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be'}
+        filtered_words = [w for w in words if len(w) > 1 and w not in stopwords]
+        
+        if filtered_words:
+            word_counts = Counter(filtered_words)
+            most_common_words = word_counts.most_common(5)
+        else:
+            most_common_words = []
+        
+        # 2. 가장 긴 후기 찾기
+        longest_review = max(all_reviews, key=lambda x: len(x.get('review', '')), default=None)
+        
+        # 3. 서울에서 가장 먼 후기 찾기
+        farthest_review = None
+        max_distance = 0
+        
+        for review in all_reviews:
+            lat = review.get('latitude')
+            lon = review.get('longitude')
+            if lat and lon:
+                try:
+                    distance = calculate_distance(seoul_lat, seoul_lon, float(lat), float(lon))
+                    if distance > max_distance:
+                        max_distance = distance
+                        farthest_review = review
+                except:
+                    continue
+        
+        # UI 렌더링
+        special_cols = st.columns(3)
+        
+        with special_cols[0]:
+            st.markdown("""
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+                    📊
+                </div>
+                <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">가장 많이 나온 단어</div>
+            """, unsafe_allow_html=True)
+            
+            if most_common_words:
+                for word, count in most_common_words[:3]:
+                    st.markdown(f"""
+                    <div style="margin: 0.5rem 0;">
+                        <span style="font-weight: 600; font-size: 1.1rem;">{word}</span>
+                        <span style="opacity: 0.8; margin-left: 0.5rem;">({count}회)</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.markdown('<div style="color: rgba(255, 255, 255, 0.8);">데이터 수집 중...</div>', unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        with special_cols[1]:
+            st.markdown("""
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+                    📜
+                </div>
+                <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">가장 긴 후기</div>
+            """, unsafe_allow_html=True)
+            
+            if longest_review:
+                review_text = re.sub('<.*?>', '', longest_review.get('review', ''))
+                st.markdown(f"""
+                <div style="margin: 0.5rem 0;">
+                    <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        {longest_review.get('gallery', '알 수 없는 장소')}
+                    </div>
+                    <div style="font-size: 0.85rem; opacity: 0.9; line-height: 1.4;">
+                        {review_text[:150]}{'...' if len(review_text) > 150 else ''}
+                    </div>
+                    <div style="margin-top: 0.5rem; opacity: 0.7; font-size: 0.8rem;">
+                        총 {len(review_text)}자
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown('<div style="color: rgba(255, 255, 255, 0.8);">데이터 수집 중...</div>', unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        with special_cols[2]:
+            st.markdown("""
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2);">
+                    🌏
+                </div>
+                <div class="stat-label" style="color: rgba(255, 255, 255, 0.9);">서울에서 가장 먼 후기</div>
+            """, unsafe_allow_html=True)
+            
+            if farthest_review:
+                st.markdown(f"""
+                <div style="margin: 0.5rem 0;">
+                    <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        {farthest_review.get('gallery', '알 수 없는 장소')}
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0;">
+                        {max_distance:.1f} km
+                    </div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">
+                        서울 시청으로부터의 거리
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown('<div style="color: rgba(255, 255, 255, 0.8);">데이터 수집 중...</div>', unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.info("📊 후기 데이터를 수집 중입니다. 잠시 후 다시 확인해주세요.")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # 차트 섹션
     col1, col2 = st.columns([2, 1])
     
