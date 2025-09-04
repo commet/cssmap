@@ -21,9 +21,9 @@ from gallery_coordinates import get_gallery_coordinates
 # .env 파일 로드
 load_dotenv()
 
-# 임시 API 키
-TEMP_API_KEY = "pdltp_d271492999e5db6c2cb47a28ea8598a13d343d0a7d32880eeb87d4ea89074944205d6c"
-os.environ['PADLET_API_KEY'] = TEMP_API_KEY
+# Padlet API 키
+PADLET_API_KEY = "pdltp_d271492999e5db6c2cb47a28ea8598a13d343d0a7d32880eeb87d4ea89074944205d6c"
+os.environ['PADLET_API_KEY'] = PADLET_API_KEY
 
 # 페이지 설정
 st.set_page_config(
@@ -403,16 +403,22 @@ def fetch_padlet_data():
             
             # Padlet 포스트를 reviews 형식으로 변환
             for post in posts:
-                if post.get('type') == 'posts':
+                if post.get('type') == 'post':
                     attributes = post.get('attributes', {})
+                    content = attributes.get('content', {})
                     
-                    # 위치 정보 파싱
-                    location = attributes.get('location', {})
-                    lat = location.get('latitude')
-                    lng = location.get('longitude')
+                    # 위치 정보 파싱 (mapProps에서)
+                    map_props = attributes.get('mapProps', {})
+                    lat = map_props.get('latitude')
+                    lng = map_props.get('longitude')
+                    location_name = map_props.get('locationName', '')
+                    
+                    # 콘텐츠에서 제목과 본문 추출
+                    subject = content.get('subject', '')
+                    body_html = content.get('bodyHtml', '')
+                    body = body_html if body_html else ''  # HTML을 텍스트로 처리 필요
                     
                     # 감정 이모지 파싱 (본문에서 추출)
-                    body = attributes.get('body', '')
                     emotion = '👍 만족'
                     if '😍' in body:
                         emotion = '😍 감동'
@@ -423,17 +429,19 @@ def fetch_padlet_data():
                     elif '🤔' in body:
                         emotion = '🤔 고민'
                     
-                    padlet_review = {
-                        'padlet_id': post.get('id'),
-                        'gallery': attributes.get('subject', '갤러리'),
-                        'review': body,
-                        'timestamp': attributes.get('created_at', datetime.now()),
-                        'emotion': emotion,
-                        'latitude': lat,
-                        'longitude': lng,
-                        'from_padlet': True
-                    }
-                    st.session_state.padlet_data.append(padlet_review)
+                    # 위치 정보가 있는 경우만 추가
+                    if lat and lng:
+                        padlet_review = {
+                            'padlet_id': post.get('id'),
+                            'gallery': location_name if location_name else subject,  # 장소명 또는 제목 사용
+                            'review': body,
+                            'timestamp': attributes.get('createdAt', datetime.now().isoformat()),
+                            'emotion': emotion,
+                            'latitude': lat,
+                            'longitude': lng,
+                            'from_padlet': True
+                        }
+                        st.session_state.padlet_data.append(padlet_review)
         
         st.session_state.last_padlet_fetch = datetime.now()
         
@@ -442,6 +450,7 @@ def fetch_padlet_data():
         
     except Exception as e:
         # 에러가 있어도 앱이 중단되지 않도록
+        print(f"Padlet fetch error: {e}")  # 디버깅용
         return False
 
 # 메인 탭 (사용 설명을 첫 번째로)
